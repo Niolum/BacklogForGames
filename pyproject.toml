@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "backlogforgames"
+version = "0.1.0"
+description = "API BacklogForGames"
+authors = ["Niolum <al_belov98@mail.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.105.0"
+uvicorn = {extras = ["standart"], version = "^0.24.0.post1"}
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^3.0.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
