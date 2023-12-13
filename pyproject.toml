@@ -13,6 +13,9 @@ asyncpg = "^0.29.0"
 sqlalchemy = {version = "^2.0.23", extras = ["asyncio"]}
 alembic = "^1.13.0"
 python-dotenv = "^1.0.0"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+python-multipart = "^0.0.6"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^3.0.3"

@@ -19,6 +19,6 @@ class User(Base):
     first_name: Mapped[str | None] = mapped_column(String(60))
     last_name: Mapped[str | None] = mapped_column(String(60))
     avatar: Mapped[str | None]
-    email: Mapped[str]
+    email: Mapped[str] = mapped_column(unique=True)
     hashed_password: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
