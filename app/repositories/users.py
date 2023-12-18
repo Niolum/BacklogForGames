@@ -1,5 +1,7 @@
 """User repositories module"""
 
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,7 +22,7 @@ class UserRepository:
         )
         return result.scalars().fetchall()
 
-    async def get_by_id(self, async_session: AsyncSession, user_id: str) -> User:
+    async def get_by_id(self, async_session: AsyncSession, user_id: UUID) -> User:
         """Getting user by id from DB"""
         result = await async_session.execute(
             select(User)
@@ -39,7 +41,8 @@ class UserRepository:
             password: str,
             first_name: str | None,
             last_name: str | None,
-            avatar: str | None
+            avatar: str | None,
+            about: str | None
         ):
         """Create user in DB"""
         user = User(
@@ -48,14 +51,24 @@ class UserRepository:
             email=email,
             first_name=first_name,
             last_name=last_name,
-            avatar=avatar
+            avatar=avatar,
+            about=about
         )
         async_session.add(user)
         await async_session.commit()
         await async_session.refresh(user)
         return user
 
-    async def delete_by_id(self, async_session: AsyncSession, user_id: str):
+    async def update(self, async_session:AsyncSession, user_id: UUID, data: dict):
+        """Update data"""
+        user = await self.get_by_id(async_session, user_id)
+        for key, value in data.items():
+            setattr(user, key, value)
+        await async_session.commit()
+        await async_session.refresh(user)
+        return user
+
+    async def delete_by_id(self, async_session: AsyncSession, user_id: UUID):
         """Delete user from DB"""
         result = await async_session.execute(
             select(User)
@@ -72,6 +85,15 @@ class UserRepository:
         result = await async_session.execute(
             select(User)
             .where(User.username==username)
+        )
+        user = result.scalars().first()
+        return user
+
+    async def get_by_email(self, async_session: AsyncSession, email: str):
+        """Getting by email"""
+        result = await async_session.execute(
+            select(User)
+            .where(User.email==email)
         )
         user = result.scalars().first()
         return user

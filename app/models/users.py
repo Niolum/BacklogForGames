@@ -21,4 +21,5 @@ class User(Base):
     avatar: Mapped[str | None]
     email: Mapped[str] = mapped_column(unique=True)
     hashed_password: Mapped[str]
+    about: Mapped[str | None]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())

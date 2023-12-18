@@ -2,7 +2,7 @@
 
 
 from app.repositories.users import UserRepository
-from app.services.users import UserService, CurrentUserService
+from app.services.users import UserService
 from app.services.auth import AuthService
 from app.services.database import DatabaseSessionManager
 
@@ -19,7 +19,6 @@ user_repo = UserRepository()
 
 auth_service = AuthService(user_repo)
 user_service = UserService(user_repo)
-current_user_service = CurrentUserService(user_repo)
 
 
 def get_auth_service():
@@ -30,10 +29,6 @@ def get_auth_service():
 def get_user_service():
     """Function return UserService"""
     return user_service
-
-def get_current_user_service():
-    """Function return CurrentUserService"""
-    return current_user_service
 
 
 async def get_db():

@@ -23,8 +23,9 @@ def init_app(init_db=True):
 
     server = FastAPI(title="BacklogGames", lifespan=lifespan)
 
-    from app.endpoints.users import user_router
+    from app.endpoints.users import user_router, auth_router
 
+    server.include_router(auth_router, prefix="/api")
     server.include_router(user_router, prefix="/api")
 
     return server
