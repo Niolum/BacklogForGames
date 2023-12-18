@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.settings import setting
-from app.services.database import sessionmanager
+from app.depends import sessionmanager
 
 
 def init_app(init_db=True):
@@ -22,5 +22,10 @@ def init_app(init_db=True):
                 await sessionmanager.close()
 
     server = FastAPI(title="BacklogGames", lifespan=lifespan)
+
+    from app.endpoints.users import user_router, auth_router
+
+    server.include_router(auth_router, prefix="/api")
+    server.include_router(user_router, prefix="/api")
 
     return server

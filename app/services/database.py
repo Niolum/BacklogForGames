@@ -12,6 +12,8 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import declarative_base
 
+from app.exceptions.database import DatabaseSessionManagerNotInitializedError
+
 
 Base = declarative_base()
 
@@ -40,7 +42,7 @@ class DatabaseSessionManager:
     async def connect(self) -> AsyncIterator[AsyncConnection]:
         """ContextManager for connection to DB"""
         if self._engine is None:
-            raise Exception("DatabaseSessionManager is not initialized")
+            raise DatabaseSessionManagerNotInitializedError()
 
         async with self._engine.begin() as connection:
             try:
@@ -53,7 +55,7 @@ class DatabaseSessionManager:
     async def session(self) -> AsyncIterator[AsyncSession]:
         """ContextManager for work with session"""
         if self._sessionmaker is None:
-            raise Exception("DatabaseSessionManager is not initialized")
+            raise DatabaseSessionManagerNotInitializedError()
 
         session = self._sessionmaker()
         try:
@@ -71,12 +73,3 @@ class DatabaseSessionManager:
     async def drop_all(self, connection:AsyncConnection):
         """Function for drop data in DB used for test"""
         await connection.run_sync(Base.metadata.drop_all)
-
-
-sessionmanager = DatabaseSessionManager()
-
-
-async def get_db():
-    """Function for work with DatabaseSessionManager"""
-    async with sessionmanager.session() as session:
-        yield session
