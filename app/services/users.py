@@ -40,7 +40,8 @@ class UserService:
         first_name: str | None,
         last_name: str | None,
         avatar: str | None,
-        about: str | None
+        about: str | None,
+        is_superuser: bool = False
     ):
         """Create user"""
         user = await self._repository.get_by_email(async_session, email)
@@ -64,7 +65,8 @@ class UserService:
             first_name=first_name,
             last_name=last_name,
             avatar=avatar,
-            about=about
+            about=about,
+            is_superuser=is_superuser
         )
 
     async def update_user(

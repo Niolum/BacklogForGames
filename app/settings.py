@@ -26,5 +26,14 @@ class Setting:
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
+    USERNAME: str = os.getenv("ADMIN_USERNAME", "admin")
+    EMAIL: str = os.getenv("EMAIL", "admin@admin.ru")
+    PASSWORD: str = os.getenv("PASSWORD", "12345")
+    FIRST_NAME: str | None = os.getenv("FIRST_NAME", None)
+    LAST_NAME: str | None = os.getenv("LAST_NAME", None)
+    AVATAR: str | None = os.getenv("AVATAR", None)
+    ABOUT: str | None = os.getenv("ABOUT", None)
+    IS_SUPERUSER: bool = bool(os.getenv("IS_SUPERUSER", None))
+
 
 setting = Setting()

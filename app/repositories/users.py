@@ -42,7 +42,8 @@ class UserRepository:
             first_name: str | None,
             last_name: str | None,
             avatar: str | None,
-            about: str | None
+            about: str | None,
+            is_superuser: bool = False
         ):
         """Create user in DB"""
         user = User(
@@ -52,14 +53,15 @@ class UserRepository:
             first_name=first_name,
             last_name=last_name,
             avatar=avatar,
-            about=about
+            about=about,
+            is_superuser=is_superuser
         )
         async_session.add(user)
         await async_session.commit()
         await async_session.refresh(user)
         return user
 
-    async def update(self, async_session:AsyncSession, user_id: UUID, data: dict):
+    async def update(self, async_session: AsyncSession, user_id: UUID, data: dict):
         """Update data"""
         user = await self.get_by_id(async_session, user_id)
         for key, value in data.items():
