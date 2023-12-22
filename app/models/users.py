@@ -23,3 +23,4 @@ class User(Base):
     hashed_password: Mapped[str]
     about: Mapped[str | None]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    is_superuser: Mapped[bool] = mapped_column(server_default='f')

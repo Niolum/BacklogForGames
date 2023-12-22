@@ -1,6 +1,5 @@
 """Dependency Injection File"""
 
-
 from app.repositories.users import UserRepository
 from app.services.users import UserService
 from app.services.auth import AuthService
