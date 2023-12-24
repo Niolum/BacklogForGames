@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  backlogdb:
+    image: postgres:latest
+    env_file:
+      - .docker.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - backlog_db:/var/lib/postgresql/data
+  web:
+    build: .
+    container_name: web-backlog
+    command: >
+      /bin/sh -c "alembic upgrade head
+      && gunicorn -w 4 -k uvicorn.workers.UvicornWorker run:server --bind 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - backlogdb
+    env_file:
+      - .docker.env
+    volumes:
+      - .:/backlogforgames
+
+volumes:
+  backlog_db:
+    external: True
