@@ -7,7 +7,7 @@ from sqladmin import Admin
 from app.admin.auth import AdminAuth
 from app.admin.models import UserAdmin
 from app.settings import setting
-from app.depends import sessionmanager, get_user_service
+from app.depends import sessionmanager, get_user_service, get_auth_service
 
 
 def init_app(init_db=True):
@@ -18,6 +18,7 @@ def init_app(init_db=True):
     if init_db:
         sessionmanager.init(setting.DB_CONFIG)
         user_service = get_user_service()
+        auth_service = get_auth_service()
 
         @asynccontextmanager
         async def lifespan(app: FastAPI):
@@ -31,11 +32,12 @@ def init_app(init_db=True):
             is_superuser = setting.IS_SUPERUSER
             async with sessionmanager.session() as session:
                 try:
+                    hashed_password = auth_service.get_password_hash(password)
                     await user_service.create_user(
                         session,
                         username,
                         email,
-                        password,
+                        hashed_password,
                         first_name,
                         last_name,
                         avatar,
@@ -55,7 +57,7 @@ def init_app(init_db=True):
     server.include_router(auth_router, prefix="/api")
     server.include_router(user_router, prefix="/api")
 
-    authentication_back = AdminAuth(sessionmanager, secret_key="12345")
+    authentication_back = AdminAuth(sessionmanager, secret_key=setting.SECRET_KEY)
     admin = Admin(server, sessionmanager._engine, authentication_backend=authentication_back)
     admin.add_view(UserAdmin)
 
