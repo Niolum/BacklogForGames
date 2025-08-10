@@ -36,7 +36,7 @@ class DatabaseSessionManager:
             msg = 'DatabaseSessionManager is not initialized'
             self._raise_exception(msg)
 
-        await self._engine.dispose()
+        await self._engine.dispose()  # type: ignore [union-attr]
 
         self._engine = None
         self._sessionmaker = None
@@ -50,7 +50,7 @@ class DatabaseSessionManager:
             msg = 'DatabaseSessionManager is not initialized'
             self._raise_exception(msg)
 
-        async with self._engine.begin() as connection:
+        async with self._engine.begin() as connection:  # type: ignore [union-attr]
             try:
                 yield connection
             except Exception:
@@ -65,7 +65,7 @@ class DatabaseSessionManager:
             msg = 'DatabaseSessionManager is not initialized'
             self._raise_exception(msg)
 
-        session = self._sessionmaker()
+        session = self._sessionmaker()  # type: ignore
         try:
             yield session
         except Exception:

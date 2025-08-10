@@ -13,9 +13,12 @@ class Settings(BaseSettings):
         env_parse_none_str='None',
     )
 
+    project_name: str = 'Backlog For Games'
+
     # DB
     db_alembic_url: PostgresDsn = PostgresDsn('postgresql+asyncpg://postgres:password@localhost/backlogforgames')
     db_echo: bool = False
+    db_schema_name: str = 'backlog_for_games_app'
 
 
 
