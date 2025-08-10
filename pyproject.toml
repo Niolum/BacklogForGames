@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "backlogforgames"
+version = "0.1.0"
+description = "API BacklogForGames"
+authors = ["Niolum <al_belov98@mail.ru>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["standard"], version = "^0.116.1"}
+alembic = "^1.16.4"
+pydantic-settings = "^2.10.1"
+asyncpg = "^0.30.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.17.1"
+ruff = "^0.12.8"
+
+[tool.mypy]
+mypy_path = "app"
+explicit_package_bases = true
+ignore_missing_imports = true
+
+[tool.ruff]
+src = ["app"]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "C90", "D", "N", "F", "I", "S", "PL", "B", "A", "COM", "C4", "DTZ", "EM", "EXE",
+    "ISC", "ICN", "G", "INP", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID",
+    "INT", "ARG", "PTH", "RUF006", "RUF007", "RUF100", "UP"
+]
+ignore = [
+    "D100", "D105", "D106", "D107", "D104", "D417", "D203", "D213", "C408", "D415", "N818", "A003",
+    "A002", "B008", "PLR0913", "PLC0415"
+]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+no-lines-before = ["future", "standard-library", "local-folder"]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+docstring-quotes = "double"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
