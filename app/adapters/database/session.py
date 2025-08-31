@@ -41,7 +41,6 @@ class DatabaseSessionManager:
         self._engine = None
         self._sessionmaker = None
 
-
     @contextlib.asynccontextmanager
     async def connect(self) -> AsyncGenerator[AsyncConnection]:
         """Connect to db"""
@@ -75,7 +74,18 @@ class DatabaseSessionManager:
             await session.close()
 
 
-session_manager = DatabaseSessionManager(str(settings.db_alembic_url), {'echo': settings.db_echo})
+session_manager = DatabaseSessionManager(
+    str(settings.db_alembic_url),
+    {
+        'echo': settings.db_echo,
+        'connect_args': {
+            'server_settings': {
+                'search_path': settings.db_schema_name,
+            },
+        },
+        'pool_pre_ping': True,
+    },
+)
 
 
 async def get_db_session():

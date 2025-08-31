@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     # DB
     db_alembic_url: PostgresDsn = PostgresDsn('postgresql+asyncpg://postgres:pass@backlogdb:5434/backlog_app')
     db_echo: bool = False
-    db_schema_name: str = 'backlog_for_games_app'
+    db_schema_name: str = 'backlog_app'
+    db_infra_schema: str = 'infra'
 
 
 

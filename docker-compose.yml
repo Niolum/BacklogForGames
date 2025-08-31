@@ -2,12 +2,14 @@ services:
 
   backlogdb:
     image: postgres:latest
+    container_name: backlogdb-postgres
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+      - PGPORT=5435
     ports:
-      - "5434:5434"
+      - "5435:5435"
     volumes:
       - backlog_db:/var/lib/postgresql/data
   web:

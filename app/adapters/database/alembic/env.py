@@ -1,7 +1,11 @@
+# ruff: noqa: ARG001
 import asyncio
+from collections.abc import Iterable
 from logging.config import fileConfig
 
 from alembic import context
+from alembic.environment import MigrationContext
+from alembic.operations import MigrationScript
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
@@ -48,7 +52,9 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        include_schemas=True,
         dialect_opts={'paramstyle': 'named'},
+        version_table_schema=settings.db_infra_schema,
     )
 
     with context.begin_transaction():
@@ -56,7 +62,30 @@ def run_migrations_offline() -> None:
 
 def do_run_migrations(connection):
     """Run migrations"""
-    context.configure(connection=connection, target_metadata=target_metadata)
+
+    def include_name(name, type_, parent_names):
+        if type_ == 'schema':
+            return name in [settings.db_schema_name]
+        return True
+
+    def process_revision_directives(
+        context: MigrationContext,
+        revision: str | Iterable[str | None] | Iterable[str],
+        directives: list[MigrationScript],
+    ):
+        if getattr(config.cmd_opts, 'autogenerate', False):
+            script = directives[0]
+            if script.upgrade_ops.is_empty():  # type: ignore [union-attr]
+                directives[:] = []
+
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        version_table_schema=settings.db_infra_schema,
+        include_schemas=True,
+        include_name=include_name,
+        process_revision_directives=process_revision_directives,
+    )
 
     with context.begin_transaction():
         context.run_migrations()
