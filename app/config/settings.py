@@ -1,5 +1,9 @@
+from zoneinfo import ZoneInfo
+
 from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from domain.constants import Environment
 
 
 class Settings(BaseSettings):
@@ -14,13 +18,17 @@ class Settings(BaseSettings):
     )
 
     project_name: str = 'Backlog For Games'
+    environment: Environment = Environment.development
 
     # DB
     db_alembic_url: PostgresDsn = PostgresDsn('postgresql+asyncpg://postgres:pass@backlogdb:5434/backlog_app')
+    alchemy_pool_size: int = 5
+    alchemy_pool_max_overflow: int = 10
     db_echo: bool = False
     db_schema_name: str = 'backlog_app'
     db_infra_schema: str = 'infra'
 
+    default_timezone: ZoneInfo = ZoneInfo('Europe/Moscow')
 
 
 settings = Settings()

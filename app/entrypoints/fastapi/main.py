@@ -1,19 +1,21 @@
 from fastapi import FastAPI
 
 from config import settings
-from .lifespan import lifespan
-from .routers import user_router
+from dependencies import init_deps
+from .routers import auth_router, user_router
 
+
+init_deps()
 
 app = FastAPI(
     version='1.0.0',
     root_path='/api/v1',
-    lifespan=lifespan,
     title=settings.project_name,
 )
 
 
 routers = (
+    auth_router,
     user_router,
 )
 
