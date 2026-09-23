@@ -1,18 +1,28 @@
 services:
 
   backlogdb:
-    image: postgres:latest
+    image: postgres:17
+    container_name: backlogdb-postgres
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+      - PGPORT=5435
     ports:
-      - "5434:5434"
+      - "5435:5435"
     volumes:
       - backlog_db:/var/lib/postgresql/data
   web:
-    build: .
+    # build: .
+    build:
+      context: .
+      args:
+        USER: ${USER:?err}
+        GROUP: ${GROUP:?err}
+        USER_ID: ${USER_ID:-1000}
+        GROUP_ID: ${GROUP_ID:-1000}
     container_name: web-backlog
+    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
     command: >
       /bin/sh -c "alembic upgrade head
       && uvicorn entrypoints.fastapi.main:app --host 0.0.0.0 --port 8000 --reload --forwarded-allow-ips=*"
