@@ -10,7 +10,7 @@ def get_file_log_handler(
     path: Path,
     formatter_type: Literal['json', 'simple'] = 'json',
 ) -> logging.FileHandler:
-    """Получение файлового хендлера для логов."""
+    """Obtaining a file handler for logs."""
     file_handler = logging.FileHandler(path, encoding='utf-8')
     formatter: logging.Formatter = JsonFormatter()
     if formatter_type == 'simple':

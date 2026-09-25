@@ -11,7 +11,7 @@ class InMemBaseRepo[DomainModel: BaseModel]:
     DB: ClassVar[dict]
 
     def _get(self, **kwargs) -> DomainModel | None:
-        """Получить одну запись"""
+        """Retrieve a single record"""
         for entity in self.DB.values():
             if all(getattr(entity, key) == value for key, value in kwargs.items()):
                 return entity
