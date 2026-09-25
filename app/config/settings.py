@@ -1,3 +1,5 @@
+import logging
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from pydantic import PostgresDsn
@@ -29,6 +31,10 @@ class Settings(BaseSettings):
     db_infra_schema: str = 'infra'
 
     default_timezone: ZoneInfo = ZoneInfo('Europe/Moscow')
+
+    logs_path: Path = Path('/opt/backlogs/logs')
+    logging_simple_fmt: bool = False
+    logging_level: int = logging.INFO
 
 
 settings = Settings()

@@ -1,8 +1,9 @@
 from dependency_injector import providers
 from dependency_injector.containers import DeclarativeContainer, WiringConfiguration
 
-from adapters.database.db import async_session_maker
-from adapters.database.uow import SQLAUnitOfWork
+from adapters.databases.in_memory.uow import InMemUnitOfWork
+from adapters.databases.sqlalchemy.db import async_session_maker
+from adapters.databases.sqlalchemy.uow import SQLAUnitOfWork
 from domain.services import AuthService
 
 
@@ -22,7 +23,7 @@ class DIContainer(DeclarativeContainer):
         config.environment,
         production=sqlalchemy_uow,
         development=sqlalchemy_uow,
-        testing=sqlalchemy_uow,
+        testing=providers.Factory(InMemUnitOfWork),
     )
 
     auth_service = providers.Factory(AuthService.factory, uow=uow)

@@ -9,8 +9,8 @@ from alembic.operations import MigrationScript
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from adapters.database.db import Base
-from adapters.database.models import *  # noqa: F403
+from adapters.databases.sqlalchemy.db import Base
+from adapters.databases.sqlalchemy.models import *  # noqa: F403
 from config import settings
 
 

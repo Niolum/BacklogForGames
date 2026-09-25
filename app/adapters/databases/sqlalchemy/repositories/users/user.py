@@ -2,8 +2,8 @@ from typing import override
 
 from sqlalchemy import select, text
 
-from adapters.database.models import UserORM
-from adapters.database.repositories.base import SQLABaseRepo
+from adapters.databases.sqlalchemy.models import UserORM
+from adapters.databases.sqlalchemy.repositories.base import SQLABaseRepo
 from domain.interfaces.repositories import UserRepo
 from domain.models import User
 
