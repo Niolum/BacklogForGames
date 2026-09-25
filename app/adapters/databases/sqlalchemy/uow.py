@@ -2,7 +2,7 @@ from typing import override
 
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncSessionTransaction
 
-from adapters.database import repositories
+from adapters.databases.sqlalchemy import repositories
 from domain.interfaces.uow import UnitOfWork
 
 

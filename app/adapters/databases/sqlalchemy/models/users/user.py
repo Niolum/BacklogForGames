@@ -5,7 +5,7 @@ from sqlalchemy import Date, DateTime, Integer, Sequence, Text, func
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column
 
-from adapters.database.db import Base
+from adapters.databases.sqlalchemy.db import Base
 from domain.models import User
 
 
