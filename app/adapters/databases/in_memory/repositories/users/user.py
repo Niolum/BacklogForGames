@@ -16,4 +16,4 @@ class InMemUserRepo(InMemBaseRepo[User], UserRepo):
 
     @override
     async def get_by_email(self, email: str) -> User | None:
-        self._get(email=email)
+        return self._get(email=email)
