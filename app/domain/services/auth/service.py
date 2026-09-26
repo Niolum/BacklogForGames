@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from domain.exceptions import AuthError
+from domain.exceptions import BacklogGamesConflictError
 from domain.interfaces.repositories import UserRepo
 from domain.models.user import User
 from domain.services.base import BaseService
@@ -19,7 +19,7 @@ class AuthService(BaseService):
         db_user = await self.user_repo.get_by_email(user_data.email)
         if db_user:
             msg = f'User with email={user_data.email} already exists'
-            raise AuthError(msg)
+            raise BacklogGamesConflictError(msg)
 
         next_id = await self.user_repo.get_next_id()
         hashed_password = hash_password(user_data.password)

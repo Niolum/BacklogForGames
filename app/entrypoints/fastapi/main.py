@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from config import settings
 from dependencies import init_deps
+from .exception_handlers import register_exception_handlers
 from .routers import auth_router, user_router
 
 
@@ -12,6 +13,7 @@ app = FastAPI(
     root_path='/api/v1',
     title=settings.project_name,
 )
+register_exception_handlers(app)
 
 
 routers = (
