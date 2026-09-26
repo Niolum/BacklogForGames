@@ -12,7 +12,7 @@ class AuthService(BaseService):
     """Service authentication for management registration, authentication and update tokens"""
 
     def __init__(self, users: UserRepo):
-        self.user_repo = users
+        self.user_repo: UserRepo = users
 
     async def register_user(self, user_data: CreateUserData) -> None:
         """Register new user"""
