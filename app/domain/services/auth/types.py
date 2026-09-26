@@ -1,11 +1,13 @@
 from pydantic import BaseModel, Field
 
+from .fields import EmailField, PasswordField
+
 
 class UserBaseData(BaseModel):
     """Base User data"""
 
-    email: str = Field(..., max_length=255)
-    password: str = Field(..., max_length=32)
+    email: EmailField
+    password: PasswordField
 
 
 class CreateUserData(UserBaseData):
