@@ -19,6 +19,29 @@ sqlalchemy = {extras = ["asyncio"], version = "^2.1.0"}
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.17.1"
 ruff = "^0.12.8"
+pytest = "^9.1.1"
+pytest-asyncio = "^1.4.0"
+httpx = "^0.28.1"
+pytest-cov = "^7.1.0"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["app/tests"]
+pythonpath = ["app"]
+addopts = "--cov --cov-report=term-missing"
+
+[tool.coverage.run]
+branch = true
+source = ["adapters", "dependencies", "domain", "entrypoints"]
+
+[tool.coverage.report]
+show_missing = true
+omit = [
+    "*/alembic/*",
+    "*/domain/logger/*",
+    "*/config/*",
+]
 
 [tool.mypy]
 mypy_path = "app"
@@ -52,6 +75,10 @@ no-lines-before = ["future", "standard-library", "local-folder"]
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"
 docstring-quotes = "double"
+
+[tool.ruff.lint.per-file-ignores]
+"app/tests/conftest.py" = ["E402"]
+"app/tests/**/*.py" = ["S101", "S105", "S106"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

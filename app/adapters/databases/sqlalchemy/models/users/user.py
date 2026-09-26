@@ -23,8 +23,8 @@ class UserORM(Base):
         nullable=False,
         comment='User ID',
     )
-    nickname: Mapped[str] = mapped_column(Text, comment='User nickname')
-    email: Mapped[str] = mapped_column(Text, comment='User email')
+    nickname: Mapped[str] = mapped_column(Text, unique=True, index=True, comment='User nickname')
+    email: Mapped[str] = mapped_column(Text, unique=True, index=True, comment='User email')
     password: Mapped[str] = mapped_column(Text, nullable=False)
     date_birth: Mapped[date | None] = mapped_column(Date, nullable=True, comment='Date of birth user')
     created_at: Mapped[datetime] = mapped_column(
