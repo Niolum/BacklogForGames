@@ -1,9 +1,11 @@
 from typing import override
+from uuid import UUID
 
 from sqlalchemy import select, text
 
 from adapters.databases.sqlalchemy.models import UserORM
 from adapters.databases.sqlalchemy.repositories.base import SQLABaseRepo
+from domain.exceptions import NotFoundError
 from domain.interfaces.repositories import UserRepo
 from domain.models import User
 
@@ -25,8 +27,34 @@ class SQLAUserRepo(SQLABaseRepo, UserRepo):
 
     @override
     async def get_by_email(self, email: str) -> User | None:
-        result = await self.session.execute(select(UserORM).where(UserORM.email == email))
+        return await self._get_user(UserORM.email == email)
+
+    @override
+    async def get_by_id(self, user_id: int) -> User | None:
+        return await self._get_user(UserORM.id == user_id)
+
+    @override
+    async def get_by_uuid(self, user_uuid: UUID) -> User | None:
+        return await self._get_user(UserORM.uuid == user_uuid)
+
+    @override
+    async def get_by_nickname(self, nickname: str) -> User | None:
+        return await self._get_user(UserORM.nickname == nickname)
+
+    @override
+    async def update(self, user: User) -> None:
+        user_orm = await self.session.get(UserORM, user.id)
+        if user_orm is None:
+            msg = f'User with id={user.id} not found'
+            raise NotFoundError(msg)
+        for field, value in user.model_dump().items():
+            setattr(user_orm, field, value)
+        await self.session.flush()
+
+    async def _get_user(self, *criteria) -> User | None:
+        """Return one user matching the criteria."""
+        result = await self.session.execute(select(UserORM).where(*criteria))
         user_orm = result.scalar_one_or_none()
-        if not user_orm:
+        if user_orm is None:
             return None
         return user_orm.to_domain()
