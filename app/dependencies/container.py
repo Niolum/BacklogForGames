@@ -4,6 +4,8 @@ from dependency_injector.containers import DeclarativeContainer, WiringConfigura
 from adapters.databases.in_memory.uow import InMemUnitOfWork
 from adapters.databases.sqlalchemy.db import async_session_maker
 from adapters.databases.sqlalchemy.uow import SQLAUnitOfWork
+from adapters.mail import LocalMailSender, SMTPMailSender
+from config import email_settings
 from domain.services import AuthService
 
 
@@ -27,3 +29,20 @@ class DIContainer(DeclarativeContainer):
     )
 
     auth_service = providers.Factory(AuthService.factory, uow=uow)
+
+    local_mail_sender = providers.Singleton(LocalMailSender)
+    smtp_mail_sender = providers.Singleton(
+        SMTPMailSender,
+        host=email_settings.host,
+        port=email_settings.port,
+        sender=email_settings.from_email,
+        username=email_settings.username,
+        password=email_settings.password,
+        starttls=email_settings.starttls,
+    )
+    mail_sender = providers.Selector(
+        config.environment,
+        production=smtp_mail_sender,
+        development=local_mail_sender,
+        testing=local_mail_sender,
+    )

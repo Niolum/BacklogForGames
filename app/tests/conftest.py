@@ -12,5 +12,5 @@ from adapters.databases.in_memory.repositories.users.user import InMemUserRepo
 
 @pytest.fixture(autouse=True)
 def clear_users() -> None:
-    """Drop users left in the in-memory repository by a previous test."""
+    """Drop users left by a previous test."""
     InMemUserRepo.DB.clear()
