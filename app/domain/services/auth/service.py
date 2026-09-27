@@ -30,6 +30,8 @@ class AuthService(BaseService):
             nickname=user_data.nickname,
             email=user_data.email,
             password=hashed_password,
+            email_confirmed=False,
+            is_admin=False,
         )
 
         await self.user_repo.create(user)

@@ -19,6 +19,9 @@ async def test_register_creates_user(client: AsyncClient) -> None:
     assert stored is not None
     assert stored.nickname == 'nick'
     assert stored.password != 'secret'
+    assert stored.avatar_url is None
+    assert stored.email_confirmed is False
+    assert stored.is_admin is False
 
 
 async def test_register_rejects_duplicate_email(client: AsyncClient) -> None:

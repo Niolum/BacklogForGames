@@ -17,6 +17,9 @@ async def test_register_user_stores_lowercased_email() -> None:
     assert stored.email == 'user@mail.ru'
     assert stored.nickname == 'nick'
     assert stored.password != 'secret'
+    assert stored.avatar_url is None
+    assert stored.email_confirmed is False
+    assert stored.is_admin is False
 
 
 async def test_register_user_rejects_duplicate_email() -> None:
