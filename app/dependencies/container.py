@@ -6,7 +6,7 @@ from adapters.databases.sqlalchemy.db import async_session_maker
 from adapters.databases.sqlalchemy.uow import SQLAUnitOfWork
 from adapters.mail import LocalMailSender, SMTPMailSender
 from config import email_settings
-from domain.services import AuthService
+from domain.services import AuthService, UserService
 
 
 class DIContainer(DeclarativeContainer):
@@ -44,3 +44,4 @@ class DIContainer(DeclarativeContainer):
         testing=local_mail_sender,
     )
     auth_service = providers.Factory(AuthService.factory, uow=uow, mail_sender=mail_sender)
+    user_service = providers.Factory(UserService.factory, uow=uow)

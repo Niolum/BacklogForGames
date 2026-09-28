@@ -7,7 +7,7 @@ from .base import (
     TooManyRequests,
 )
 from .email_confirmation import EmailAlreadyConfrimedError, EmailCofirmError, EmailConfirmationNotFoundError
-from .user import UserNotFoundError
+from .user import UserNicknameAlreadyTakenError, UserNotFoundError
 
 
 __all__ = (
@@ -20,5 +20,6 @@ __all__ = (
     'EmailConfirmationNotFoundError',
     'NotFoundError',
     'TooManyRequests',
+    'UserNicknameAlreadyTakenError',
     'UserNotFoundError',
 )

@@ -1,5 +1,5 @@
 from .auth import confirm_email, get_current_user, login, register_user, resend_confirmation_email
-from .users import get_user_by_uuid
+from .users import get_user_by_uuid, update_profile
 
 
 __all__ = [
@@ -9,4 +9,5 @@ __all__ = [
     'login',
     'register_user',
     'resend_confirmation_email',
+    'update_profile',
 ]
