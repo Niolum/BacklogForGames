@@ -4,13 +4,14 @@ from uuid import uuid4
 
 from config import settings
 from domain.constants import EMAIL_CONFIRMATION_TOKEN_BYTES, EMAIL_CONFIRMATION_TTL
-from domain.exceptions import BacklogGamesConflictError, EmailAlreadyConfrimedError, EmailCofirmError
+from domain.exceptions import AuthError, BacklogGamesConflictError, EmailAlreadyConfrimedError, EmailCofirmError
 from domain.interfaces.mail import MailSender
 from domain.interfaces.repositories import EmailConfirmationRepo, UserRepo
 from domain.models import EmailConfirmation, MailMessage, User
 from domain.services.base import BaseService
-from .types import CreateUserData
-from .utils import hash_password
+from .tokens import create_access_token
+from .types import CreateUserData, LoginData
+from .utils import hash_password, verify_password
 
 
 class AuthService(BaseService):
@@ -48,6 +49,17 @@ class AuthService(BaseService):
 
         await self.user_repo.create(user)
         await self.send_confirmation_email(user)
+
+    async def login(self, user_data: LoginData) -> str:
+        """Issue an access token for a confirmed user."""
+        user = await self.user_repo.get_by_email(user_data.email)
+        if user is None or not verify_password(user_data.password, user.password):
+            msg = 'Invalid email or password'
+            raise AuthError(msg)
+        if not user.email_confirmed:
+            msg = 'Email is not confirmed'
+            raise AuthError(msg)
+        return create_access_token(user.uuid)
 
     async def resend_confirmation_email(self, email: str) -> None:
         """Send a new confirmation link when the email is still unconfirmed."""

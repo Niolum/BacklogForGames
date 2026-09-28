@@ -1,5 +1,5 @@
 from .service import AuthService
-from .types import CreateUserData
+from .types import CreateUserData, LoginData
 
 
-__all__ = ('AuthService', 'CreateUserData')
+__all__ = ('AuthService', 'CreateUserData', 'LoginData')

@@ -21,3 +21,10 @@ class ResendConfirmationRequestSchema(BaseModel):
     """Schema for sending the confirmation email again."""
 
     email: EmailField = Field(description='Email')
+
+
+class LoginRequestSchema(BaseModel):
+    """Schema for login."""
+
+    email: EmailField = Field(description='Email')
+    password: PasswordField = Field(description='Password')

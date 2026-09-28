@@ -1,4 +1,4 @@
-from .auth import AuthService, CreateUserData
+from .auth import AuthService, CreateUserData, LoginData
 
 
-__all__ = ['AuthService', 'CreateUserData']
+__all__ = ['AuthService', 'CreateUserData', 'LoginData']

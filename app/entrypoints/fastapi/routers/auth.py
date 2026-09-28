@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Response, status
 
-from domain.services import CreateUserData
-from domain.use_cases import confirm_email, register_user, resend_confirmation_email
+from domain.services import CreateUserData, LoginData
+from domain.use_cases import confirm_email, login, register_user, resend_confirmation_email
 from entrypoints.fastapi.schemas.request import (
     ConfirmEmailRequestSchema,
+    LoginRequestSchema,
     ResendConfirmationRequestSchema,
     UserRegisterRequestSchema,
 )
+from entrypoints.fastapi.schemas.response import LoginResponseSchema
 
 
 auth_router = APIRouter(tags=['Auth'], prefix='/auth')
@@ -32,3 +34,11 @@ async def resend_confirmation_handler(request_data: ResendConfirmationRequestSch
     """Send the confirmation email again"""
     await resend_confirmation_email(request_data.email)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@auth_router.post('/login')
+async def login_handler(request_data: LoginRequestSchema) -> LoginResponseSchema:
+    """Issue an access token"""
+    data = LoginData.model_validate(request_data.model_dump(mode='json'))
+    access_token = await login(data)
+    return LoginResponseSchema(access_token=access_token)

@@ -1235,6 +1235,21 @@ files = [
 windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
+name = "pyjwt"
+version = "2.15.0"
+description = "JSON Web Token implementation in Python"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "pyjwt-2.15.0-py3-none-any.whl", hash = "sha256:7a3742debf6b879e912dbb9819ceec1594be812452b78c5f2e2dfc56564954f8"},
+    {file = "pyjwt-2.15.0.tar.gz", hash = "sha256:b11c5f9791d7bf51c2b39a81ed669f6b2dbbd669df2942f6c60167e9e3d1abe4"},
+]
+
+[package.extras]
+crypto = ["cryptography (>=3.4.0)"]
+
+[[package]]
 name = "pytest"
 version = "9.1.1"
 description = "pytest: simple powerful testing with Python"
@@ -2195,4 +2210,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "10578a46c69ad3582e4dc6cef36082cc3d7a49ab480571615e60e2fba15cd71d"
+content-hash = "8c6dfc8e9faac86adfcb0653c1728ae2ee383d3d1453b448751c17236c14ccd4"

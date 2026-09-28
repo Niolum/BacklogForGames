@@ -1,7 +1,7 @@
 from dependency_injector.wiring import Provide, inject
 
 from domain.interfaces.uow import UnitOfWork
-from domain.services import AuthService, CreateUserData
+from domain.services import AuthService, CreateUserData, LoginData
 
 
 @inject
@@ -13,6 +13,17 @@ async def register_user(
     """Register new user"""
     async with uow:
         await auth_service.register_user(user_data)
+
+
+@inject
+async def login(
+    user_data: LoginData,
+    uow: UnitOfWork = Provide['uow'],
+    auth_service: 'AuthService' = Provide['auth_service'],
+) -> str:
+    """Issue an access token."""
+    async with uow:
+        return await auth_service.login(user_data)
 
 
 @inject

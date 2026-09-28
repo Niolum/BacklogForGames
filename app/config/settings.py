@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from pydantic import HttpUrl, PostgresDsn
+from pydantic import HttpUrl, PostgresDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from domain.constants import Environment
@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     logs_path: Path = Path('/opt/backlogs/logs')
     logging_simple_fmt: bool = False
     logging_level: int = logging.INFO
+
+    jwt_secret: SecretStr = SecretStr('dev-only-change-me-not-for-production')
 
 
 settings = Settings()
