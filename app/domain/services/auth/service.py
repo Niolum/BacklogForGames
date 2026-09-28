@@ -1,8 +1,13 @@
+import secrets
+from datetime import datetime
 from uuid import uuid4
 
+from config import settings
+from domain.constants import EMAIL_CONFIRMATION_TOKEN_BYTES, EMAIL_CONFIRMATION_TTL
 from domain.exceptions import BacklogGamesConflictError
-from domain.interfaces.repositories import UserRepo
-from domain.models.user import User
+from domain.interfaces.mail import MailSender
+from domain.interfaces.repositories import EmailConfirmationRepo, UserRepo
+from domain.models import EmailConfirmation, MailMessage, User
 from domain.services.base import BaseService
 from .types import CreateUserData
 from .utils import hash_password
@@ -11,8 +16,15 @@ from .utils import hash_password
 class AuthService(BaseService):
     """Service authentication for management registration, authentication and update tokens"""
 
-    def __init__(self, users: UserRepo):
+    def __init__(
+        self,
+        users: UserRepo,
+        email_confirmations: EmailConfirmationRepo,
+        mail_sender: MailSender,
+    ):
         self.user_repo: UserRepo = users
+        self.email_confirmation_repo: EmailConfirmationRepo = email_confirmations
+        self.mail_sender: MailSender = mail_sender
 
     async def register_user(self, user_data: CreateUserData) -> None:
         """Register new user"""
@@ -35,3 +47,24 @@ class AuthService(BaseService):
         )
 
         await self.user_repo.create(user)
+        await self.send_confirmation_email(user)
+
+    async def send_confirmation_email(self, user: User) -> None:
+        """Create a confirmation token and send the link. The email stays unconfirmed."""
+        confirmation_id = await self.email_confirmation_repo.get_next_id()
+        token = secrets.token_urlsafe(EMAIL_CONFIRMATION_TOKEN_BYTES)
+        confirmation = EmailConfirmation(
+            id=confirmation_id,
+            user_id=user.id,
+            token=token,
+            expires_at=datetime.now(settings.default_timezone) + EMAIL_CONFIRMATION_TTL,
+        )
+        await self.email_confirmation_repo.create(confirmation)
+        link = f'{str(settings.public_base_url)}auth/confirm?token={token}'
+        await self.mail_sender.send(
+            MailMessage(
+                recipient=user.email,
+                subject='Confirm your email',
+                body=f'Follow the link to confirm your email: {link}',
+            ),
+        )

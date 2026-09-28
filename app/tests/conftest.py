@@ -11,6 +11,14 @@ from adapters.databases.in_memory.repositories.email_confirmations.email_confirm
     InMemEmailConfirmationRepo,
 )
 from adapters.databases.in_memory.repositories.users.user import InMemUserRepo
+from dependencies import init_deps
+from dependencies.container import DIContainer
+
+
+@pytest.fixture
+def di_container() -> DIContainer:
+    """Testing dependency container."""
+    return init_deps()
 
 
 @pytest.fixture(autouse=True)

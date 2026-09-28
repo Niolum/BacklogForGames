@@ -15,10 +15,9 @@ class EmailSettings(BaseSettings):
 
     host: str = 'localhost'
     port: int = 587
-    username: str | None = None
-    password: str | None = None
+    username: str = 'username'
+    password: str = 'password'  # noqa: S105
     from_email: EmailStr = 'noreply@example.com'
-    starttls: bool = True
 
 
 email_settings = EmailSettings()

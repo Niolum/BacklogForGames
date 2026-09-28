@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from pydantic import PostgresDsn
+from pydantic import HttpUrl, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from domain.constants import Environment
@@ -21,6 +21,7 @@ class Settings(BaseSettings):
 
     project_name: str = 'Backlog For Games'
     environment: Environment = Environment.development
+    public_base_url: HttpUrl = HttpUrl('http://localhost:8000')
 
     # DB
     db_alembic_url: PostgresDsn = PostgresDsn('postgresql+asyncpg://postgres:pass@backlogdb:5434/backlog_app')

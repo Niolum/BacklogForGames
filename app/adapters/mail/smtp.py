@@ -15,16 +15,14 @@ class SMTPMailSender(MailSender):
         host: str,
         port: int,
         sender: str,
-        username: str | None = None,
-        password: str | None = None,
-        starttls: bool = True,
+        username: str,
+        password: str,
     ):
         self.host = host
         self.port = port
         self.sender = sender
         self.username = username
         self.password = password
-        self.starttls = starttls
 
     @override
     async def send(self, message: MailMessage) -> None:
@@ -37,9 +35,6 @@ class SMTPMailSender(MailSender):
 
     def _deliver(self, email: EmailMessage) -> None:
         """Open an SMTP session and send the message."""
-        with smtplib.SMTP(self.host, self.port) as smtp:
-            if self.starttls:
-                smtp.starttls()
-            if self.username and self.password:
-                smtp.login(self.username, self.password)
-            smtp.send_message(email)
+        with smtplib.SMTP_SSL(self.host, self.port, timeout=60) as smtp_server:
+            smtp_server.login(self.username, self.password)
+            smtp_server.send_message(email)

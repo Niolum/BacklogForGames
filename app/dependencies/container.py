@@ -28,8 +28,6 @@ class DIContainer(DeclarativeContainer):
         testing=providers.Factory(InMemUnitOfWork),
     )
 
-    auth_service = providers.Factory(AuthService.factory, uow=uow)
-
     local_mail_sender = providers.Singleton(LocalMailSender)
     smtp_mail_sender = providers.Singleton(
         SMTPMailSender,
@@ -38,7 +36,6 @@ class DIContainer(DeclarativeContainer):
         sender=email_settings.from_email,
         username=email_settings.username,
         password=email_settings.password,
-        starttls=email_settings.starttls,
     )
     mail_sender = providers.Selector(
         config.environment,
@@ -46,3 +43,4 @@ class DIContainer(DeclarativeContainer):
         development=local_mail_sender,
         testing=local_mail_sender,
     )
+    auth_service = providers.Factory(AuthService.factory, uow=uow, mail_sender=mail_sender)
