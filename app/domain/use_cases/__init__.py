@@ -1,4 +1,4 @@
-from .auth import register_user
+from .auth import confirm_email, register_user
 
 
-__all__ = ['register_user']
+__all__ = ['confirm_email', 'register_user']

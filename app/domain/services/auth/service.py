@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from config import settings
 from domain.constants import EMAIL_CONFIRMATION_TOKEN_BYTES, EMAIL_CONFIRMATION_TTL
-from domain.exceptions import BacklogGamesConflictError
+from domain.exceptions import BacklogGamesConflictError, EmailCofirmError
 from domain.interfaces.mail import MailSender
 from domain.interfaces.repositories import EmailConfirmationRepo, UserRepo
 from domain.models import EmailConfirmation, MailMessage, User
@@ -48,6 +48,19 @@ class AuthService(BaseService):
 
         await self.user_repo.create(user)
         await self.send_confirmation_email(user)
+
+    async def confirm_email(self, token: str) -> None:
+        """Confirm the email when the token is unused and not expired."""
+        confirmation = await self.email_confirmation_repo.get_by_token(token)
+        now = datetime.now(settings.default_timezone)
+        if confirmation is None or confirmation.used_at is not None or confirmation.expires_at <= now:
+            msg = 'Confirmation token is invalid'
+            raise EmailCofirmError(msg)
+
+        user = await self.user_repo.get_by_id_or_raise(confirmation.user_id)
+
+        await self.user_repo.update(user.model_copy(update={'email_confirmed': True}))
+        await self.email_confirmation_repo.update(confirmation.model_copy(update={'used_at': now}))
 
     async def send_confirmation_email(self, user: User) -> None:
         """Create a confirmation token and send the link. The email stays unconfirmed."""

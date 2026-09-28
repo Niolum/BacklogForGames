@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Response, status
 
 from domain.services import CreateUserData
-from domain.use_cases import register_user
-from entrypoints.fastapi.schemas.request import UserRegisterRequestSchema
+from domain.use_cases import confirm_email, register_user
+from entrypoints.fastapi.schemas.request import ConfirmEmailRequestSchema, UserRegisterRequestSchema
 
 
 auth_router = APIRouter(tags=['Auth'], prefix='/auth')
@@ -14,3 +14,10 @@ async def register_handler(request_data: UserRegisterRequestSchema) -> Response:
     data = CreateUserData.model_validate(request_data.model_dump(mode='json'))
     await register_user(data)
     return Response(status_code=status.HTTP_201_CREATED)
+
+
+@auth_router.post('/confirm')
+async def confirm_handler(request_data: ConfirmEmailRequestSchema) -> Response:
+    """Confirm user email"""
+    await confirm_email(request_data.token)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

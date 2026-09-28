@@ -9,3 +9,9 @@ class UserRegisterRequestSchema(BaseModel):
     email: EmailField = Field(description='Email')
     password: PasswordField = Field(description='Password')
     nickname: str = Field(description='User nickname')
+
+
+class ConfirmEmailRequestSchema(BaseModel):
+    """Schema for confirming an email."""
+
+    token: str = Field(description='Confirmation token')

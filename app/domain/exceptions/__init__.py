@@ -6,6 +6,8 @@ from .base import (
     NotFoundError,
     TooManyRequests,
 )
+from .email_confirmation import EmailCofirmError, EmailConfirmationNotFoundError
+from .user import UserNotFoundError
 
 
 __all__ = (
@@ -13,6 +15,9 @@ __all__ = (
     'BacklogGamesConflictError',
     'BacklogGamesPermissionError',
     'BadRequestError',
+    'EmailCofirmError',
+    'EmailConfirmationNotFoundError',
     'NotFoundError',
     'TooManyRequests',
+    'UserNotFoundError',
 )

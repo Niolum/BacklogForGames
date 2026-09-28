@@ -1,6 +1,9 @@
+from http import HTTPStatus
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from adapters.databases.in_memory.repositories.email_confirmations.email_confirmation import InMemEmailConfirmationRepo
 from entrypoints.fastapi.main import app
 
 
@@ -10,3 +13,15 @@ async def client():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url='http://test') as http_client:
         yield http_client
+
+
+@pytest.fixture
+async def confirmation_token(client: AsyncClient, clear_repositories: None) -> str:
+    """Token issued by registering a user after the store is cleared."""
+    del clear_repositories
+    response = await client.post(
+        '/auth/register',
+        json={'email': 'user@mail.ru', 'password': 'secret', 'nickname': 'nick'},
+    )
+    assert response.status_code == HTTPStatus.CREATED
+    return next(iter(InMemEmailConfirmationRepo.DB.values())).token

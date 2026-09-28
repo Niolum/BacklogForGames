@@ -13,3 +13,14 @@ async def register_user(
     """Register new user"""
     async with uow:
         await auth_service.register_user(user_data)
+
+
+@inject
+async def confirm_email(
+    token: str,
+    uow: UnitOfWork = Provide['uow'],
+    auth_service: 'AuthService' = Provide['auth_service'],
+) -> None:
+    """Confirm user email by token"""
+    async with uow:
+        await auth_service.confirm_email(token)
