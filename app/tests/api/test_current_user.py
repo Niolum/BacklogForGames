@@ -31,5 +31,5 @@ async def test_current_user_accepts_bearer_token(client: AsyncClient, access_tok
     """A valid bearer token passes the current-user dependency."""
     response = await client.get('/users/me', headers={'Authorization': f'Bearer {access_token}'})
 
-    assert response.status_code == HTTPStatus.NO_CONTENT
-    assert response.content == b''
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()['email'] == 'user@mail.ru'
