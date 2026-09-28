@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Response, status
 
 from domain.services import CreateUserData
-from domain.use_cases import confirm_email, register_user
-from entrypoints.fastapi.schemas.request import ConfirmEmailRequestSchema, UserRegisterRequestSchema
+from domain.use_cases import confirm_email, register_user, resend_confirmation_email
+from entrypoints.fastapi.schemas.request import (
+    ConfirmEmailRequestSchema,
+    ResendConfirmationRequestSchema,
+    UserRegisterRequestSchema,
+)
 
 
 auth_router = APIRouter(tags=['Auth'], prefix='/auth')
@@ -20,4 +24,11 @@ async def register_handler(request_data: UserRegisterRequestSchema) -> Response:
 async def confirm_handler(request_data: ConfirmEmailRequestSchema) -> Response:
     """Confirm user email"""
     await confirm_email(request_data.token)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@auth_router.post('/resend-confirmation')
+async def resend_confirmation_handler(request_data: ResendConfirmationRequestSchema) -> Response:
+    """Send the confirmation email again"""
+    await resend_confirmation_email(request_data.email)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

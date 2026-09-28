@@ -21,6 +21,15 @@ class UserRepo(BaseRepo):
     async def get_by_email(self, email: str) -> User | None:
         """Get by email"""
 
+    async def get_by_email_or_raise(self, email: str) -> User:
+        """Get by email or raise exception"""
+        user = await self.get_by_email(email)
+        if not user:
+            msg = f'User with email={email} not found'
+            raise UserNotFoundError(msg)
+
+        return user
+
     @abstractmethod
     async def get_by_id(self, user_id: int) -> User | None:
         """Get by id"""

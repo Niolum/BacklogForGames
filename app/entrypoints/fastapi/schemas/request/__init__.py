@@ -1,4 +1,4 @@
-from .auth import ConfirmEmailRequestSchema, UserRegisterRequestSchema
+from .auth import ConfirmEmailRequestSchema, ResendConfirmationRequestSchema, UserRegisterRequestSchema
 
 
-__all__ = ['ConfirmEmailRequestSchema', 'UserRegisterRequestSchema']
+__all__ = ['ConfirmEmailRequestSchema', 'ResendConfirmationRequestSchema', 'UserRegisterRequestSchema']

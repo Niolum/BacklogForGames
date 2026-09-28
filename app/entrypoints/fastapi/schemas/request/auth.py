@@ -15,3 +15,9 @@ class ConfirmEmailRequestSchema(BaseModel):
     """Schema for confirming an email."""
 
     token: str = Field(description='Confirmation token')
+
+
+class ResendConfirmationRequestSchema(BaseModel):
+    """Schema for sending the confirmation email again."""
+
+    email: EmailField = Field(description='Email')

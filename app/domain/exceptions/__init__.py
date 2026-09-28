@@ -6,7 +6,7 @@ from .base import (
     NotFoundError,
     TooManyRequests,
 )
-from .email_confirmation import EmailCofirmError, EmailConfirmationNotFoundError
+from .email_confirmation import EmailAlreadyConfrimedError, EmailCofirmError, EmailConfirmationNotFoundError
 from .user import UserNotFoundError
 
 
@@ -15,6 +15,7 @@ __all__ = (
     'BacklogGamesConflictError',
     'BacklogGamesPermissionError',
     'BadRequestError',
+    'EmailAlreadyConfrimedError',
     'EmailCofirmError',
     'EmailConfirmationNotFoundError',
     'NotFoundError',

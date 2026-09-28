@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from config import settings
 from domain.constants import EMAIL_CONFIRMATION_TOKEN_BYTES, EMAIL_CONFIRMATION_TTL
-from domain.exceptions import BacklogGamesConflictError, EmailCofirmError
+from domain.exceptions import BacklogGamesConflictError, EmailAlreadyConfrimedError, EmailCofirmError
 from domain.interfaces.mail import MailSender
 from domain.interfaces.repositories import EmailConfirmationRepo, UserRepo
 from domain.models import EmailConfirmation, MailMessage, User
@@ -47,6 +47,14 @@ class AuthService(BaseService):
         )
 
         await self.user_repo.create(user)
+        await self.send_confirmation_email(user)
+
+    async def resend_confirmation_email(self, email: str) -> None:
+        """Send a new confirmation link when the email is still unconfirmed."""
+        user = await self.user_repo.get_by_email_or_raise(email)
+        if user.email_confirmed:
+            msg = f'Email {email} is already confirmed'
+            raise EmailAlreadyConfrimedError(msg)
         await self.send_confirmation_email(user)
 
     async def confirm_email(self, token: str) -> None:

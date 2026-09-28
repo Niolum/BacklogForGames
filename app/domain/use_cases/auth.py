@@ -16,6 +16,17 @@ async def register_user(
 
 
 @inject
+async def resend_confirmation_email(
+    email: str,
+    uow: UnitOfWork = Provide['uow'],
+    auth_service: 'AuthService' = Provide['auth_service'],
+) -> None:
+    """Send another confirmation link for an unconfirmed email."""
+    async with uow:
+        await auth_service.resend_confirmation_email(email)
+
+
+@inject
 async def confirm_email(
     token: str,
     uow: UnitOfWork = Provide['uow'],

@@ -7,3 +7,7 @@ class EmailConfirmationNotFoundError(NotFoundError):
 
 class EmailCofirmError(BadRequestError):
     """Email confrim error"""
+
+
+class EmailAlreadyConfrimedError(BadRequestError):
+    """Email already confirmed"""
