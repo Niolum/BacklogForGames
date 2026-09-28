@@ -47,6 +47,15 @@ class UserRepo(BaseRepo):
     async def get_by_uuid(self, user_uuid: UUID) -> User | None:
         """Get by uuid"""
 
+    async def get_by_uuid_or_raise(self, user_uuid: UUID) -> User:
+        """Get by uuid or raise exception"""
+        user = await self.get_by_uuid(user_uuid)
+        if not user:
+            msg = f'User with uuid={user_uuid} not found'
+            raise UserNotFoundError(msg)
+
+        return user
+
     @abstractmethod
     async def get_by_nickname(self, nickname: str) -> User | None:
         """Get by nickname"""

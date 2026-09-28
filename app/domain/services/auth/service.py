@@ -9,7 +9,7 @@ from domain.interfaces.mail import MailSender
 from domain.interfaces.repositories import EmailConfirmationRepo, UserRepo
 from domain.models import EmailConfirmation, MailMessage, User
 from domain.services.base import BaseService
-from .tokens import create_access_token
+from .tokens import create_access_token, decode_access_token
 from .types import CreateUserData, LoginData
 from .utils import hash_password, verify_password
 
@@ -60,6 +60,11 @@ class AuthService(BaseService):
             msg = 'Email is not confirmed'
             raise AuthError(msg)
         return create_access_token(user.uuid)
+
+    async def get_current_user(self, token: str) -> User:
+        """Return the user stored in a valid access token."""
+        user_uuid = decode_access_token(token)
+        return await self.user_repo.get_by_uuid_or_raise(user_uuid)
 
     async def resend_confirmation_email(self, email: str) -> None:
         """Send a new confirmation link when the email is still unconfirmed."""
