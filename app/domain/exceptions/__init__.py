@@ -7,7 +7,8 @@ from .base import (
     TooManyRequests,
 )
 from .email_confirmation import EmailAlreadyConfrimedError, EmailCofirmError, EmailConfirmationNotFoundError
-from .user import UserNicknameAlreadyTakenError, UserNotFoundError
+from .file import InvalidFilePath, UploadFileTypeError
+from .user import UploadUserAvatarError, UserNicknameAlreadyTakenError, UserNotFoundError
 
 
 __all__ = (
@@ -18,8 +19,11 @@ __all__ = (
     'EmailAlreadyConfrimedError',
     'EmailCofirmError',
     'EmailConfirmationNotFoundError',
+    'InvalidFilePath',
     'NotFoundError',
     'TooManyRequests',
+    'UploadFileTypeError',
+    'UploadUserAvatarError',
     'UserNicknameAlreadyTakenError',
     'UserNotFoundError',
 )

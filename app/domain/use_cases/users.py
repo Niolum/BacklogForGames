@@ -18,6 +18,30 @@ async def get_user_by_uuid(
 
 
 @inject
+async def upload_avatar(
+    user: User,
+    content: bytes,
+    content_type: str | None,
+    uow: UnitOfWork = Provide['uow'],
+    user_service: UserService = Provide['user_service'],
+) -> User:
+    """Store an avatar for the given user."""
+    async with uow:
+        return await user_service.upload_avatar(user, content, content_type)
+
+
+@inject
+async def delete_avatar(
+    user: User,
+    uow: UnitOfWork = Provide['uow'],
+    user_service: UserService = Provide['user_service'],
+) -> None:
+    """Remove the avatar of the given user."""
+    async with uow:
+        await user_service.delete_avatar(user)
+
+
+@inject
 async def update_profile(
     user: User,
     data: UpdateProfileData,
