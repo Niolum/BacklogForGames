@@ -1,11 +1,13 @@
 from datetime import date, datetime
+from pathlib import Path
 from uuid import UUID
 
-from sqlalchemy import Date, DateTime, Integer, Sequence, Text, func
+from sqlalchemy import Boolean, Date, DateTime, Integer, Sequence, Text, false, func
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column
 
 from adapters.databases.sqlalchemy.db import Base
+from adapters.databases.sqlalchemy.types import PathType
 from domain.models import User
 
 
@@ -34,3 +36,16 @@ class UserORM(Base):
         comment='Date of registration user',
     )
     about: Mapped[str | None] = mapped_column(Text, nullable=True, comment='Information about yourself')
+    avatar_url: Mapped[Path | None] = mapped_column(PathType, nullable=True, comment='User avatar URL')
+    email_confirmed: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default=false(),
+        comment='Email confirmation flag',
+    )
+    is_admin: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default=false(),
+        comment='Administrator flag',
+    )

@@ -3,13 +3,14 @@ from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-    from domain.interfaces.repositories import UserRepo
+    from domain.interfaces.repositories import EmailConfirmationRepo, UserRepo
 
 
 class UnitOfWork(ABC):
     """Abstract class for Unit of Work"""
 
     users: 'UserRepo'
+    email_confirmations: 'EmailConfirmationRepo'
 
     @abstractmethod
     async def begin(self) -> None:

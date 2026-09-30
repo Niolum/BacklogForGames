@@ -6,6 +6,9 @@ from .base import (
     NotFoundError,
     TooManyRequests,
 )
+from .email_confirmation import EmailAlreadyConfrimedError, EmailCofirmError, EmailConfirmationNotFoundError
+from .file import InvalidFilePath, UploadFileTypeError
+from .user import UploadUserAvatarError, UserNicknameAlreadyTakenError, UserNotFoundError
 
 
 __all__ = (
@@ -13,6 +16,14 @@ __all__ = (
     'BacklogGamesConflictError',
     'BacklogGamesPermissionError',
     'BadRequestError',
+    'EmailAlreadyConfrimedError',
+    'EmailCofirmError',
+    'EmailConfirmationNotFoundError',
+    'InvalidFilePath',
     'NotFoundError',
     'TooManyRequests',
+    'UploadFileTypeError',
+    'UploadUserAvatarError',
+    'UserNicknameAlreadyTakenError',
+    'UserNotFoundError',
 )

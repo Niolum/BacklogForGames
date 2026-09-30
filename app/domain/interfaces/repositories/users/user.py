@@ -1,5 +1,7 @@
 from abc import abstractmethod
+from uuid import UUID
 
+from domain.exceptions import UserNotFoundError
 from domain.interfaces.repositories.base import BaseRepo
 from domain.models import User
 
@@ -18,3 +20,46 @@ class UserRepo(BaseRepo):
     @abstractmethod
     async def get_by_email(self, email: str) -> User | None:
         """Get by email"""
+
+    async def get_by_email_or_raise(self, email: str) -> User:
+        """Get by email or raise exception"""
+        user = await self.get_by_email(email)
+        if not user:
+            msg = f'User with email={email} not found'
+            raise UserNotFoundError(msg)
+
+        return user
+
+    @abstractmethod
+    async def get_by_id(self, user_id: int) -> User | None:
+        """Get by id"""
+
+    async def get_by_id_or_raise(self, user_id: int) -> User:
+        """Get by id or riase exception"""
+        user = await self.get_by_id(user_id)
+        if not user:
+            msg = f'User with id={user_id} not found'
+            raise UserNotFoundError(msg)
+
+        return user
+
+    @abstractmethod
+    async def get_by_uuid(self, user_uuid: UUID) -> User | None:
+        """Get by uuid"""
+
+    async def get_by_uuid_or_raise(self, user_uuid: UUID) -> User:
+        """Get by uuid or raise exception"""
+        user = await self.get_by_uuid(user_uuid)
+        if not user:
+            msg = f'User with uuid={user_uuid} not found'
+            raise UserNotFoundError(msg)
+
+        return user
+
+    @abstractmethod
+    async def get_by_nickname(self, nickname: str) -> User | None:
+        """Get by nickname"""
+
+    @abstractmethod
+    async def update(self, user: User) -> None:
+        """Update user"""

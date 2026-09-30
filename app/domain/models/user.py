@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from pathlib import Path
 from uuid import UUID
 
 from pydantic import AwareDatetime, BaseModel, Field
@@ -20,3 +21,6 @@ class User(BaseModel):
         description='Date of registration user',
     )
     about: str | None = Field(default=None, description='Information about yourself')
+    avatar_url: Path | None = Field(default=None, description='User avatar URL')
+    email_confirmed: bool = Field(default=False, description='Email confirmation flag')
+    is_admin: bool = Field(default=False, description='Administrator flag')

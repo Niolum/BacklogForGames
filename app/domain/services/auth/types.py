@@ -14,3 +14,7 @@ class CreateUserData(UserBaseData):
     """Model for create user"""
 
     nickname: str = Field(..., max_length=255)
+
+
+class LoginData(UserBaseData):
+    """Model for login"""

@@ -34,6 +34,7 @@ services:
       - .env
     volumes:
       - .:/backlogforgames
+      - ${LOCAL_STORAGE_DIR:-/opt/backlogs/local_storage}:${CONTAINER_STORAGE_DIR:-/opt/backlogs/local_storage}
       - ${LOCAL_LOGS_DIR:-/opt/backlogs/logs}:${CONTAINER_LOGS_DIR:-/opt/backlogs/logs}
 
 volumes:

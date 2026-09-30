@@ -3,6 +3,7 @@ from http import HTTPStatus
 import pytest
 from httpx import AsyncClient
 
+from adapters.databases.in_memory.repositories.email_confirmations.email_confirmation import InMemEmailConfirmationRepo
 from adapters.databases.in_memory.repositories.users.user import InMemUserRepo
 
 
@@ -19,6 +20,14 @@ async def test_register_creates_user(client: AsyncClient) -> None:
     assert stored is not None
     assert stored.nickname == 'nick'
     assert stored.password != 'secret'
+    assert stored.avatar_url is None
+    assert stored.email_confirmed is False
+    assert stored.is_admin is False
+    confirmations = list(InMemEmailConfirmationRepo.DB.values())
+    assert len(confirmations) == 1
+    assert confirmations[0].user_id == stored.id
+    assert confirmations[0].used_at is None
+    assert confirmations[0].token
 
 
 async def test_register_rejects_duplicate_email(client: AsyncClient) -> None:
@@ -35,6 +44,7 @@ async def test_register_rejects_duplicate_email(client: AsyncClient) -> None:
     assert first.status_code == HTTPStatus.CREATED
     assert second.status_code == HTTPStatus.CONFLICT
     assert second.json() == {'detail': 'User with email=user@mail.ru already exists'}
+    assert len(InMemEmailConfirmationRepo.DB) == 1
 
 
 @pytest.mark.parametrize(
@@ -51,3 +61,4 @@ async def test_register_rejects_invalid_data(client: AsyncClient, payload: dict[
 
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     assert InMemUserRepo.DB == {}
+    assert InMemEmailConfirmationRepo.DB == {}

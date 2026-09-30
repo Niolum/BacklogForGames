@@ -23,9 +23,9 @@ class InMemBaseRepo[DomainModel: BaseModel]:
             entity for entity in self.DB.values() if all(getattr(entity, key) == value for key, value in kwargs.items())
         ]
 
-    async def get_by_id(self, pk) -> DomainModel | None:
-        """Find by PK"""
-        return self._get(id=pk)
+    # async def get_by_id(self, pk) -> DomainModel | None:
+    #     """Find by PK"""
+    #     return self._get(id=pk)
 
     async def get_next_id(self) -> int:
         """Next ID"""

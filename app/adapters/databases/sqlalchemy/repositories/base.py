@@ -8,6 +8,5 @@ if TYPE_CHECKING:
 class SQLABaseRepo:
     """Base repository SQLAlchemy"""
 
-
     def __init__(self, session: 'AsyncSession'):
         self.session = session
