@@ -8,6 +8,7 @@ from .base import (
 )
 from .email_confirmation import EmailAlreadyConfrimedError, EmailCofirmError, EmailConfirmationNotFoundError
 from .file import InvalidFilePath, UploadFileTypeError
+from .genre import GenreNotFoundError
 from .user import UploadUserAvatarError, UserNicknameAlreadyTakenError, UserNotFoundError
 
 
@@ -19,6 +20,7 @@ __all__ = (
     'EmailAlreadyConfrimedError',
     'EmailCofirmError',
     'EmailConfirmationNotFoundError',
+    'GenreNotFoundError',
     'InvalidFilePath',
     'NotFoundError',
     'TooManyRequests',
