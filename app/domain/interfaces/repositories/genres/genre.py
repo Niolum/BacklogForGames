@@ -1,5 +1,6 @@
 from abc import abstractmethod
 
+from domain.exceptions import GenreNotFoundError
 from domain.interfaces.repositories.base import BaseRepo
 from domain.models import Genre
 
@@ -18,6 +19,14 @@ class GenreRepo(BaseRepo):
     @abstractmethod
     async def get_by_id(self, genre_id: int) -> Genre | None:
         """Get by id."""
+
+    async def get_by_id_or_raise(self, genre_id: int) -> Genre:
+        """Get by id or raise exception."""
+        genre = await self.get_by_id(genre_id)
+        if genre is None:
+            msg = f'Genre with id={genre_id} not found'
+            raise GenreNotFoundError(msg)
+        return genre
 
     @abstractmethod
     async def get_by_name(self, name: str) -> Genre | None:

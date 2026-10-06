@@ -4,7 +4,7 @@ from config import settings
 from deps import init_deps
 from .admin import setup_admin
 from .exception_handlers import register_exception_handlers
-from .routers import auth_router, user_router
+from .routers import auth_router, genre_router, user_router
 
 
 init_deps()
@@ -20,6 +20,7 @@ setup_admin(app)
 
 routers = (
     auth_router,
+    genre_router,
     user_router,
 )
 
