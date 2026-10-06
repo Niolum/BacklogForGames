@@ -1,8 +1,20 @@
 import pytest
 
 from adapters.databases.in_memory.repositories.genres.genre import InMemGenreRepo
-from domain.exceptions import NotFoundError
+from domain.exceptions import GenreNotFoundError, NotFoundError
 from domain.models import Genre
+
+
+async def test_genre_repo_get_by_id_or_raise_returns_genre(genre: Genre) -> None:
+    """A stored id is returned, and an unknown id raises not found."""
+    repo = InMemGenreRepo()
+    await repo.create(genre)
+    missing_id = genre.id + 1
+
+    assert await repo.get_by_id_or_raise(genre.id) == genre
+
+    with pytest.raises(GenreNotFoundError, match=f'Genre with id={missing_id} not found'):
+        await repo.get_by_id_or_raise(missing_id)
 
 
 async def test_genre_repo_finds_genre_by_id_and_name(genre: Genre) -> None:

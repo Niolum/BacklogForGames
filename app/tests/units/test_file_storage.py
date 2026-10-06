@@ -4,7 +4,7 @@ import pytest
 
 from adapters.databases.in_memory.repositories.users.user import InMemUserRepo
 from adapters.storage import LocalFileStorage, S3FileStorage
-from dependencies.container import DIContainer
+from deps.container import DIContainer
 from domain.exceptions import BadRequestError
 from domain.services.auth.types import CreateUserData
 

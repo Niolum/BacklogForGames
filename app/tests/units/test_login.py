@@ -1,7 +1,7 @@
 import pytest
 
 from adapters.databases.in_memory.repositories.users.user import InMemUserRepo
-from dependencies.container import DIContainer
+from deps.container import DIContainer
 from domain.exceptions import AuthError
 from domain.services.auth.tokens import decode_access_token
 from domain.services.auth.types import LoginData

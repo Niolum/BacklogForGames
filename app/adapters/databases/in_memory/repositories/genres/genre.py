@@ -10,6 +10,7 @@ class InMemGenreRepo(InMemBaseRepo[Genre], GenreRepo):
     """In-memory genre repository."""
 
     DB: ClassVar[dict[int, Genre]] = {}
+    USED_BY_GAMES: ClassVar[set[int]] = set()
 
     @override
     async def create(self, genre: Genre) -> None:
@@ -22,6 +23,10 @@ class InMemGenreRepo(InMemBaseRepo[Genre], GenreRepo):
     @override
     async def get_by_name(self, name: str) -> Genre | None:
         return self._get(name=name)
+
+    @override
+    async def has_games(self, genre_id: int) -> bool:
+        return genre_id in self.USED_BY_GAMES
 
     @override
     async def get_all(self) -> list[Genre]:

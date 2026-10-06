@@ -1,7 +1,7 @@
 import pytest
 
-from dependencies import init_deps
-from dependencies.container import DIContainer
+from deps import init_deps
+from deps.container import DIContainer
 
 
 @pytest.fixture

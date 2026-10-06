@@ -4,7 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from adapters.databases.in_memory.repositories.users.user import InMemUserRepo
-from dependencies.container import DIContainer
+from deps.container import DIContainer
 from domain.exceptions import BacklogGamesConflictError
 from domain.services import UpdateProfileData
 from domain.services.auth.types import CreateUserData

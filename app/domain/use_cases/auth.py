@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from dependency_injector.wiring import Provide, inject
 
 from domain.interfaces.uow import UnitOfWork
@@ -25,6 +27,28 @@ async def login(
     """Issue an access token."""
     async with uow:
         return await auth_service.login(user_data)
+
+
+@inject
+async def authenticate_admin(
+    user_data: LoginData,
+    uow: UnitOfWork = Provide['uow'],
+    auth_service: 'AuthService' = Provide['auth_service'],
+) -> User | None:
+    """Return the administrator when the email and password are valid."""
+    async with uow:
+        return await auth_service.authenticate_admin(user_data)
+
+
+@inject
+async def get_admin_user(
+    user_uuid: UUID,
+    uow: UnitOfWork = Provide['uow'],
+    auth_service: 'AuthService' = Provide['auth_service'],
+) -> User | None:
+    """Load the administrator stored in the admin session."""
+    async with uow:
+        return await auth_service.get_admin_user(user_uuid)
 
 
 @inject

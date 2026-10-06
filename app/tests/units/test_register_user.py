@@ -5,7 +5,7 @@ import pytest
 from adapters.databases.in_memory.repositories.email_confirmations.email_confirmation import InMemEmailConfirmationRepo
 from adapters.databases.in_memory.repositories.users.user import InMemUserRepo
 from config import settings
-from dependencies.container import DIContainer
+from deps.container import DIContainer
 from domain.constants import EMAIL_CONFIRMATION_TTL
 from domain.exceptions import BacklogGamesConflictError
 from domain.services.auth.types import CreateUserData

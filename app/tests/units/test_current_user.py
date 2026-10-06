@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import pytest
 
-from dependencies.container import DIContainer
+from deps.container import DIContainer
 from domain.exceptions import AuthError, UserNotFoundError
 from domain.services.auth.tokens import create_access_token
 
