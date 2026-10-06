@@ -33,6 +33,12 @@ class SQLAGenreRepo(SQLABaseRepo, GenreRepo):
         return await self._get_genre(GenreORM.name == name)
 
     @override
+    async def has_games(self, genre_id: int) -> bool:
+        """Games are not stored yet, so a genre is not in use."""
+        del genre_id
+        return False
+
+    @override
     async def get_all(self) -> list[Genre]:
         result = await self.session.execute(select(GenreORM).order_by(GenreORM.id))
         return [genre_orm.to_domain() for genre_orm in result.scalars()]

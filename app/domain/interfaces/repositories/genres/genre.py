@@ -33,6 +33,10 @@ class GenreRepo(BaseRepo):
         """Get by name."""
 
     @abstractmethod
+    async def has_games(self, genre_id: int) -> bool:
+        """Return whether any game references this genre."""
+
+    @abstractmethod
     async def get_all(self) -> list[Genre]:
         """Return all genres ordered by id."""
 

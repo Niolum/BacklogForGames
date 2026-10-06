@@ -17,6 +17,7 @@ def clear_repositories() -> None:
     InMemUserRepo.DB.clear()
     InMemEmailConfirmationRepo.DB.clear()
     InMemGenreRepo.DB.clear()
+    InMemGenreRepo.USED_BY_GAMES.clear()
     root = Path(os.environ['STORAGE_CONFIG__LOCAL_ROOT'])
     if root.exists():
         shutil.rmtree(root)
