@@ -1,7 +1,7 @@
 import pytest
 
 from adapters.databases.in_memory.repositories.email_confirmations.email_confirmation import InMemEmailConfirmationRepo
-from dependencies.container import DIContainer
+from deps.container import DIContainer
 from domain.services.auth.types import CreateUserData, LoginData
 
 

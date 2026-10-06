@@ -1,6 +1,6 @@
 import secrets
 from datetime import datetime
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from config import settings
 from domain.constants import EMAIL_CONFIRMATION_TOKEN_BYTES, EMAIL_CONFIRMATION_TTL
@@ -60,6 +60,22 @@ class AuthService(BaseService):
             msg = 'Email is not confirmed'
             raise AuthError(msg)
         return create_access_token(user.uuid)
+
+    async def authenticate_admin(self, user_data: LoginData) -> User | None:
+        """Return the user when the password matches and they are a confirmed administrator."""
+        user = await self.user_repo.get_by_email(user_data.email)
+        if user is None or not verify_password(user_data.password, user.password):
+            return None
+        if not user.email_confirmed or not user.is_admin:
+            return None
+        return user
+
+    async def get_admin_user(self, user_uuid: UUID) -> User | None:
+        """Return the user when they are still a confirmed administrator."""
+        user = await self.user_repo.get_by_uuid(user_uuid)
+        if user is None or not user.email_confirmed or not user.is_admin:
+            return None
+        return user
 
     async def get_current_user(self, token: str) -> User:
         """Return the user stored in a valid access token."""

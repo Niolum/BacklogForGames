@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 
 from config import settings
-from dependencies import init_deps
+from deps import init_deps
+from .admin import setup_admin
 from .exception_handlers import register_exception_handlers
 from .routers import auth_router, user_router
 
@@ -14,6 +15,7 @@ app = FastAPI(
     title=settings.project_name,
 )
 register_exception_handlers(app)
+setup_admin(app)
 
 
 routers = (
