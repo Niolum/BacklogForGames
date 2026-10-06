@@ -10,7 +10,7 @@ from domain.models import Genre
 
 
 class SQLAGenreRepo(SQLABaseRepo, GenreRepo):
-    """Реализация репозитория жанров на SQLAlchemy."""
+    """Implementing a genre repository using SQLAlchemy."""
 
     @override
     async def get_next_id(self) -> int:
