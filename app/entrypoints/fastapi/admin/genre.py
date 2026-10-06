@@ -14,7 +14,6 @@ class GenreAdmin(ModelView, model=GenreORM):
     name = 'Genre'
     name_plural = 'Genres'
     column_list = [GenreORM.id, GenreORM.name, GenreORM.description]
-    column_details_list = [GenreORM.id, GenreORM.name, GenreORM.description]
     form_columns = [GenreORM.name, GenreORM.description]
 
     @override
