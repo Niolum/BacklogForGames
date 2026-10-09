@@ -1,9 +1,13 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
+from pathlib import Path
+from typing import NamedTuple
 from uuid import UUID
 
 import pytest
 
-from domain.models import Game
+from adapters.databases.in_memory.repositories.games.game import InMemGameRepo
+from adapters.databases.in_memory.repositories.genres.genre import InMemGenreRepo
+from domain.models import Game, Genre
 
 
 GAME_UUID = UUID('6f1d8c2a-4b7e-4d1a-9c3f-2a8b6e5d4c31')
@@ -52,3 +56,59 @@ def third_game() -> Game:
 def hidden_game() -> Game:
     """Unpublished game."""
     return _game(4, HIDDEN_GAME_UUID, 'Hidden Planescape', is_published=False)
+
+
+class Catalog(NamedTuple):
+    """Published and hidden games saved with their genres."""
+
+    planescape: Game
+    torment: Game
+    disco: Game
+    hidden: Game
+    rpg: Genre
+    strategy: Genre
+
+
+@pytest.fixture
+async def catalog(
+    game: Game,
+    second_game: Game,
+    third_game: Game,
+    hidden_game: Game,
+    genre: Genre,
+    strategy_genre: Genre,
+    clear_repositories: None,
+) -> Catalog:
+    """Save a small catalog: three published games and one hidden game."""
+    del clear_repositories
+    await InMemGenreRepo().create(genre)
+    await InMemGenreRepo().create(strategy_genre)
+    planescape = game.model_copy(
+        update={
+            'release_date': date(1999, 12, 6),
+            'cover_url': Path('covers/planescape.png'),
+            'description': 'A story',
+            'metacritic': 91,
+            'developer': 'Black Isle',
+            'publisher': 'Interplay',
+            'external_source': 'igdb',
+            'external_id': '1',
+            'genres': [genre, strategy_genre],
+        },
+    )
+    torment = second_game.model_copy(update={'genres': [strategy_genre]})
+    disco = third_game.model_copy(update={'genres': [genre]})
+    hidden = hidden_game.model_copy(update={'genres': [genre], 'external_source': 'igdb', 'external_id': '2'})
+    repo = InMemGameRepo()
+    await repo.create(disco)
+    await repo.create(planescape)
+    await repo.create(torment)
+    await repo.create(hidden)
+    return Catalog(
+        planescape=planescape,
+        torment=torment,
+        disco=disco,
+        hidden=hidden,
+        rpg=genre,
+        strategy=strategy_genre,
+    )
