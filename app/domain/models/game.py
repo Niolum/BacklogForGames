@@ -1,8 +1,10 @@
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import AwareDatetime, BaseModel, Field
+
+from config import settings
 
 
 class Game(BaseModel):
@@ -20,3 +22,11 @@ class Game(BaseModel):
     is_published: bool = Field(default=True, description='Published in the catalog')
     external_source: str | None = Field(default=None, description='External catalog source')
     external_id: str | None = Field(default=None, description='External catalog id')
+    created_at: AwareDatetime = Field(
+        default_factory=lambda: datetime.now(settings.default_timezone),
+        description='Record creation time',
+    )
+    updated_at: AwareDatetime = Field(
+        default_factory=lambda: datetime.now(settings.default_timezone),
+        description='Record update time',
+    )
