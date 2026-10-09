@@ -7,7 +7,7 @@ from .auth import (
     register_user,
     resend_confirmation_email,
 )
-from .games import get_game_by_uuid, get_games
+from .games import create_game, get_game_by_uuid, get_games, update_game
 from .genres import create_genre, delete_genre, get_genre_by_id, get_genres, update_genre
 from .users import delete_avatar, get_user_by_uuid, update_profile, upload_avatar
 
@@ -15,6 +15,7 @@ from .users import delete_avatar, get_user_by_uuid, update_profile, upload_avata
 __all__ = [
     'authenticate_admin',
     'confirm_email',
+    'create_game',
     'create_genre',
     'delete_avatar',
     'delete_genre',
@@ -28,6 +29,7 @@ __all__ = [
     'login',
     'register_user',
     'resend_confirmation_email',
+    'update_game',
     'update_genre',
     'update_profile',
     'upload_avatar',

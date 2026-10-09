@@ -6,6 +6,7 @@ from sqladmin import Admin
 from adapters.databases.sqlalchemy.db import engine
 from config import settings
 from .authentication import AdminAuthentication
+from .game import GameAdmin
 from .genre import GenreAdmin
 from .mount import install_admin_mount_path
 
@@ -24,5 +25,6 @@ def setup_admin(app: FastAPI) -> Admin:
         templates_dir=str(_TEMPLATES_DIR),
     )
     admin.add_view(GenreAdmin)
+    admin.add_view(GameAdmin)
     install_admin_mount_path(app)
     return admin

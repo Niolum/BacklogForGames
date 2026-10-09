@@ -8,6 +8,11 @@ from domain.services import GenreChangeData, GenreCreateData
 from domain.use_cases import create_genre, delete_genre, update_genre
 
 
+def _game_names(genre: GenreORM, _attribute: str) -> list[str]:
+    """Names of the games attached to the genre."""
+    return [game.title for game in genre.games]
+
+
 class GenreAdmin(ModelView, model=GenreORM):
     """Genre screen of the admin panel."""
 
@@ -15,6 +20,22 @@ class GenreAdmin(ModelView, model=GenreORM):
     name_plural = 'Genres'
     column_list = [GenreORM.id, GenreORM.name, GenreORM.description]
     form_columns = [GenreORM.name, GenreORM.description]
+    column_formatters_detail = {GenreORM.games: _game_names}
+
+    def _identity_for_object(self, obj):
+        # For objects of our model, we use our own identity.
+        if isinstance(obj, self.model):
+            return self.identity
+
+        # For related objects, we look for a suitable ModelView.
+        admin = getattr(self, '_admin_ref', None)
+        if admin:
+            for view in admin.views:
+                if isinstance(view, ModelView) and isinstance(obj, view.model):
+                    return view.identity
+
+        # If nothing is found, we revert to standard behavior.
+        return super()._identity_for_object(obj)
 
     @override
     async def insert_model(self, request: Request, data: dict) -> GenreORM:
