@@ -1,4 +1,4 @@
-from .app import Environment
+from .app import DEFAULT_LIMIT, Environment
 from .auth import ACCESS_TOKEN_TTL, JWT_ALGORITHM
 from .email_confirmation import EMAIL_CONFIRMATION_TOKEN_BYTES, EMAIL_CONFIRMATION_TTL
 from .user import AVATAR_EXTENSIONS, AVATAR_MAX_BYTES, PASSWORD_MAX_BYTES
@@ -8,6 +8,7 @@ __all__ = (
     'ACCESS_TOKEN_TTL',
     'AVATAR_EXTENSIONS',
     'AVATAR_MAX_BYTES',
+    'DEFAULT_LIMIT',
     'EMAIL_CONFIRMATION_TOKEN_BYTES',
     'EMAIL_CONFIRMATION_TTL',
     'JWT_ALGORITHM',

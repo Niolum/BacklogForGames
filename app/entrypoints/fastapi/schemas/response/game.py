@@ -21,6 +21,13 @@ class GameResponseSchema(BaseModel):
     genres: list[GenreResponseSchema] = Field(default_factory=list, description='Genres of the game')
 
 
+class GameCardResponseSchema(GameResponseSchema):
+    """One published game."""
+
+    users_score: float | None = Field(default=None, description='Average user score')
+    ratings_count: int = Field(default=0, description='Number of user scores')
+
+
 class GamePageResponseSchema(BaseModel):
     """One page of published games."""
 

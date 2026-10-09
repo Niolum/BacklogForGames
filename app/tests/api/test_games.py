@@ -2,6 +2,7 @@ from datetime import date
 from http import HTTPStatus
 from pathlib import Path
 from typing import NamedTuple
+from uuid import UUID
 
 import pytest
 from httpx import AsyncClient
@@ -159,5 +160,57 @@ async def test_list_games_returns_the_requested_slice(client: AsyncClient, catal
 async def test_list_games_rejects_non_positive_limit(client: AsyncClient) -> None:
     """A limit below 1 is rejected before lookup."""
     response = await client.get('/games', params={'limit': 0, 'offset': -1})
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+async def test_get_game_returns_published_card(client: AsyncClient, catalog: Catalog) -> None:
+    """A known published uuid returns the card with genres and empty ratings."""
+    response = await client.get(f'/games/{catalog.planescape.uuid}')
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'uuid': str(catalog.planescape.uuid),
+        'title': catalog.planescape.title,
+        'release_date': '1999-12-06',
+        'cover_url': 'covers/planescape.png',
+        'description': 'A story',
+        'metacritic': 91,
+        'developer': 'Black Isle',
+        'publisher': 'Interplay',
+        'genres': [
+            {'id': catalog.rpg.id, 'name': catalog.rpg.name, 'description': catalog.rpg.description},
+            {
+                'id': catalog.strategy.id,
+                'name': catalog.strategy.name,
+                'description': catalog.strategy.description,
+            },
+        ],
+        'users_score': None,
+        'ratings_count': 0,
+    }
+
+
+async def test_get_game_unknown_uuid_returns_404(client: AsyncClient) -> None:
+    """An unknown uuid returns 404."""
+    missing_uuid = UUID('00000000-0000-0000-0000-000000000099')
+
+    response = await client.get(f'/games/{missing_uuid}')
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': f'Game with uuid={missing_uuid} not found'}
+
+
+async def test_get_game_hidden_returns_404(client: AsyncClient, catalog: Catalog) -> None:
+    """A hidden game is missing from the catalog."""
+    response = await client.get(f'/games/{catalog.hidden.uuid}')
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': f'Game with uuid={catalog.hidden.uuid} not found'}
+
+
+async def test_get_game_rejects_non_uuid(client: AsyncClient) -> None:
+    """A non-uuid path is rejected before lookup."""
+    response = await client.get('/games/not-a-uuid')
 
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY

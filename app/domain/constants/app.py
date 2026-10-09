@@ -1,6 +1,9 @@
 from enum import StrEnum, auto
 
 
+DEFAULT_LIMIT = 20
+
+
 class Environment(StrEnum):
     """Среда выполнения"""
 
