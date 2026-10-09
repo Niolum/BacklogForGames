@@ -80,9 +80,6 @@ class GameORM(Base):
     @override
     async def to_domain(self) -> Game:
         """Domain game with its genres."""
-        # game = super().to_domain()
-        # genres = sorted(game.genres, key=lambda genre: genre.id)
-        # return game.model_copy(update={'genres': genres})
         game = Game(
             id=self.id,
             uuid=self.uuid,
