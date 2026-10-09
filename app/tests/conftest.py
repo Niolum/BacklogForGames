@@ -9,6 +9,7 @@ os.environ['STORAGE_CONFIG__LOCAL_ROOT'] = tempfile.mkdtemp(prefix='backlog-test
 pytest_plugins = [
     'tests.fixtures.admin',
     'tests.fixtures.container',
+    'tests.fixtures.game',
     'tests.fixtures.genre',
     'tests.fixtures.repositories',
 ]

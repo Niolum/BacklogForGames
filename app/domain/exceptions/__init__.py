@@ -8,6 +8,7 @@ from .base import (
 )
 from .email_confirmation import EmailAlreadyConfrimedError, EmailCofirmError, EmailConfirmationNotFoundError
 from .file import InvalidFilePath, UploadFileTypeError
+from .game import GameNotFoundError
 from .genre import GenreHasGamesError, GenreNameAlreadyTakenError, GenreNotFoundError
 from .user import UploadUserAvatarError, UserNicknameAlreadyTakenError, UserNotFoundError
 
@@ -20,6 +21,7 @@ __all__ = (
     'EmailAlreadyConfrimedError',
     'EmailCofirmError',
     'EmailConfirmationNotFoundError',
+    'GameNotFoundError',
     'GenreHasGamesError',
     'GenreNameAlreadyTakenError',
     'GenreNotFoundError',

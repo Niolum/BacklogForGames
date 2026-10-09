@@ -10,7 +10,6 @@ class InMemGenreRepo(InMemBaseRepo[Genre], GenreRepo):
     """In-memory genre repository."""
 
     DB: ClassVar[dict[int, Genre]] = {}
-    USED_BY_GAMES: ClassVar[set[int]] = set()
 
     @override
     async def create(self, genre: Genre) -> None:
@@ -26,7 +25,9 @@ class InMemGenreRepo(InMemBaseRepo[Genre], GenreRepo):
 
     @override
     async def has_games(self, genre_id: int) -> bool:
-        return genre_id in self.USED_BY_GAMES
+        from adapters.databases.in_memory.repositories.games.game import InMemGameRepo
+
+        return any(genre.id == genre_id for game in InMemGameRepo.DB.values() for genre in game.genres)
 
     @override
     async def get_all(self) -> list[Genre]:

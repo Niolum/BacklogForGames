@@ -4,9 +4,10 @@ import pytest
 from httpx import AsyncClient
 from starlette.requests import Request
 
+from adapters.databases.in_memory.repositories.games.game import InMemGameRepo
 from adapters.databases.in_memory.repositories.genres.genre import InMemGenreRepo
 from domain.exceptions import GenreHasGamesError
-from domain.models import Genre
+from domain.models import Game, Genre
 from entrypoints.fastapi.admin.genre import GenreAdmin
 
 
@@ -74,9 +75,9 @@ async def test_admin_deletes_genre(client: AsyncClient, stored_genre: Genre) -> 
     assert listed.json() == []
 
 
-async def test_admin_delete_rejects_genre_used_by_games(stored_genre: Genre) -> None:
+async def test_admin_delete_rejects_genre_used_by_games(stored_genre: Genre, game: Game) -> None:
     """Delete is refused while games reference the genre."""
-    InMemGenreRepo.USED_BY_GAMES.add(stored_genre.id)
+    await InMemGameRepo().create(game.model_copy(update={'genres': [stored_genre]}))
 
     with pytest.raises(GenreHasGamesError, match='cannot be deleted because games use it'):
         await GenreAdmin().delete_model(_request(), str(stored_genre.id))
