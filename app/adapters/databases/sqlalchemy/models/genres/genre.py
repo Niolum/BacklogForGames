@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from sqlalchemy import Index, Integer, Sequence, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -38,3 +38,8 @@ class GenreORM(Base):
             unique=True,
         ),
     )
+
+    @override
+    def __str__(self) -> str:
+        """Genre name shown in the admin panel."""
+        return self.name

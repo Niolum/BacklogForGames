@@ -7,7 +7,7 @@ from adapters.databases.sqlalchemy.uow import SQLAUnitOfWork
 from adapters.mail import LocalMailSender, SMTPMailSender
 from adapters.storage import LocalFileStorage, S3FileStorage
 from config import email_settings, storage_settings
-from domain.services import AuthService, GenreService, UserService
+from domain.services import AuthService, GameService, GenreService, UserService
 
 
 class DIContainer(DeclarativeContainer):
@@ -62,3 +62,4 @@ class DIContainer(DeclarativeContainer):
     )
     user_service = providers.Factory(UserService.factory, uow=uow, file_storage=file_storage)
     genre_service = providers.Factory(GenreService.factory, uow=uow)
+    game_service = providers.Factory(GameService.factory, uow=uow)
