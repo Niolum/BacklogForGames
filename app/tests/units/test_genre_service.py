@@ -1,9 +1,10 @@
 import pytest
 
+from adapters.databases.in_memory.repositories.games.game import InMemGameRepo
 from adapters.databases.in_memory.repositories.genres.genre import InMemGenreRepo
 from deps.container import DIContainer
 from domain.exceptions import GenreHasGamesError, GenreNameAlreadyTakenError, GenreNotFoundError
-from domain.models import Genre
+from domain.models import Game, Genre
 from domain.services import GenreChangeData, GenreCreateData
 
 
@@ -61,9 +62,13 @@ async def test_delete_genre_removes_it(di_container: DIContainer, stored_genre: 
     assert await InMemGenreRepo().get_by_id(stored_genre.id) is None
 
 
-async def test_delete_genre_rejects_genre_used_by_games(di_container: DIContainer, stored_genre: Genre) -> None:
+async def test_delete_genre_rejects_genre_used_by_games(
+    di_container: DIContainer,
+    stored_genre: Genre,
+    game: Game,
+) -> None:
     """A genre that games reference stays stored."""
-    InMemGenreRepo.USED_BY_GAMES.add(stored_genre.id)
+    await InMemGameRepo().create(game.model_copy(update={'genres': [stored_genre]}))
 
     message = f'Genre with id={stored_genre.id} cannot be deleted because games use it'
     with pytest.raises(GenreHasGamesError, match=message):

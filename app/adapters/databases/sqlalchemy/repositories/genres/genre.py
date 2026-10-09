@@ -2,7 +2,7 @@ from typing import override
 
 from sqlalchemy import select, text
 
-from adapters.databases.sqlalchemy.models import GenreORM
+from adapters.databases.sqlalchemy.models import GameGenreORM, GenreORM
 from adapters.databases.sqlalchemy.repositories.base import SQLABaseRepo
 from domain.exceptions import GenreNotFoundError
 from domain.interfaces.repositories import GenreRepo
@@ -34,9 +34,10 @@ class SQLAGenreRepo(SQLABaseRepo, GenreRepo):
 
     @override
     async def has_games(self, genre_id: int) -> bool:
-        """Games are not stored yet, so a genre is not in use."""
-        del genre_id
-        return False
+        result = await self.session.execute(
+            select(GameGenreORM.game_id).where(GameGenreORM.genre_id == genre_id).limit(1),
+        )
+        return result.scalar_one_or_none() is not None
 
     @override
     async def get_all(self) -> list[Genre]:

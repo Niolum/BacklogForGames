@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import AwareDatetime, BaseModel, Field
 
 from config import settings
+from domain.models.genre import Genre
 
 
 class Game(BaseModel):
@@ -22,6 +23,7 @@ class Game(BaseModel):
     is_published: bool = Field(default=True, description='Published in the catalog')
     external_source: str | None = Field(default=None, description='External catalog source')
     external_id: str | None = Field(default=None, description='External catalog id')
+    genres: list[Genre] = Field(default_factory=list, description='Genres of the game')
     created_at: AwareDatetime = Field(
         default_factory=lambda: datetime.now(settings.default_timezone),
         description='Record creation time',
@@ -30,3 +32,10 @@ class Game(BaseModel):
         default_factory=lambda: datetime.now(settings.default_timezone),
         description='Record update time',
     )
+
+
+class GamePage(BaseModel):
+    """One page of games and the total number of matches."""
+
+    items: list[Game]
+    total: int

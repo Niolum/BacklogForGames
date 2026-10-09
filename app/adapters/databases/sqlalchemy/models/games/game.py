@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import date, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 from uuid import UUID
 
 from sqlalchemy import Boolean, Date, DateTime, Index, Integer, Sequence, Text, func, true
@@ -11,7 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from adapters.databases.sqlalchemy.db import Base
 from adapters.databases.sqlalchemy.models.game_genres.game_genre import GameGenreORM
 from adapters.databases.sqlalchemy.types import PathType
-from domain.models import Game
+from domain.models import Game, Genre
 
 
 if TYPE_CHECKING:
@@ -64,6 +64,8 @@ class GameORM(Base):
     genres: Mapped[list[GenreORM]] = relationship(
         secondary=GameGenreORM.__table__,
         back_populates='games',
+        lazy='selectin',
+        order_by='GenreORM.id',
     )
 
     __table_args__ = (
@@ -74,3 +76,39 @@ class GameORM(Base):
             unique=True,
         ),
     )
+
+    @override
+    async def to_domain(self) -> Game:
+        """Domain game with its genres."""
+        game = Game(
+            id=self.id,
+            uuid=self.uuid,
+            title=self.title,
+            release_date=self.release_date,
+            cover_url=self.cover_url,
+            description=self.description,
+            metacritic=self.metacritic,
+            developer=self.developer,
+            publisher=self.publisher,
+            is_published=self.is_published,
+            external_source=self.external_source,
+            external_id=self.external_id,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+        )
+
+        genre_orms: list[GenreORM] = await self.awaitable_attrs.genres
+
+        genres = []
+        for genre in genre_orms:
+            genres.append(
+                Genre(
+                    id=genre.id,
+                    name=genre.name,
+                    description=genre.description,
+                    external_source=genre.external_source,
+                    external_id=genre.external_id,
+                ),
+            )
+        game.genres = genres
+        return game
