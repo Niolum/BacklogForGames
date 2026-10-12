@@ -4,10 +4,11 @@ from dependency_injector.containers import DeclarativeContainer, WiringConfigura
 from adapters.databases.in_memory.uow import InMemUnitOfWork
 from adapters.databases.sqlalchemy.db import async_session_maker
 from adapters.databases.sqlalchemy.uow import SQLAUnitOfWork
+from adapters.http_fetchers import AsyncHttpAPIFetcher, LocalHttpAPIFetcher
 from adapters.mail import LocalMailSender, SMTPMailSender
 from adapters.storage import LocalFileStorage, S3FileStorage
-from config import email_settings, storage_settings
-from domain.services import AuthService, GameService, GenreService, UserService
+from config import email_settings, rawg_settings, storage_settings
+from domain.services import AuthService, GameService, GenreService, RawgService, UserService
 
 
 class DIContainer(DeclarativeContainer):
@@ -63,3 +64,13 @@ class DIContainer(DeclarativeContainer):
     user_service = providers.Factory(UserService.factory, uow=uow, file_storage=file_storage)
     genre_service = providers.Factory(GenreService.factory, uow=uow)
     game_service = providers.Factory(GameService.factory, uow=uow, file_storage=file_storage)
+
+    local_http_fetcher = providers.Singleton(LocalHttpAPIFetcher)
+    async_http_fetcher = providers.Singleton(AsyncHttpAPIFetcher, base_url=str(rawg_settings.base_url))
+    http_fetcher = providers.Selector(
+        config.environment,
+        production=async_http_fetcher,
+        development=async_http_fetcher,
+        testing=local_http_fetcher,
+    )
+    rawg_service = providers.Factory(RawgService.factory, uow=uow, http_fetcher=http_fetcher)
