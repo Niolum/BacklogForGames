@@ -62,4 +62,4 @@ class DIContainer(DeclarativeContainer):
     )
     user_service = providers.Factory(UserService.factory, uow=uow, file_storage=file_storage)
     genre_service = providers.Factory(GenreService.factory, uow=uow)
-    game_service = providers.Factory(GameService.factory, uow=uow)
+    game_service = providers.Factory(GameService.factory, uow=uow, file_storage=file_storage)

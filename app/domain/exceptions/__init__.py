@@ -8,7 +8,7 @@ from .base import (
 )
 from .email_confirmation import EmailAlreadyConfrimedError, EmailCofirmError, EmailConfirmationNotFoundError
 from .file import InvalidFilePath, UploadFileTypeError
-from .game import GameNotFoundError
+from .game import GameNotFoundError, UploadGameCoverError
 from .genre import GenreHasGamesError, GenreNameAlreadyTakenError, GenreNotFoundError
 from .user import UploadUserAvatarError, UserNicknameAlreadyTakenError, UserNotFoundError
 
@@ -29,6 +29,7 @@ __all__ = (
     'NotFoundError',
     'TooManyRequests',
     'UploadFileTypeError',
+    'UploadGameCoverError',
     'UploadUserAvatarError',
     'UserNicknameAlreadyTakenError',
     'UserNotFoundError',

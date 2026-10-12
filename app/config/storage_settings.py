@@ -21,6 +21,7 @@ class StorageSettings(BaseSettings):
     s3_endpoint_url: str | None = None
 
     base_user_avatar_path: Path = Path('avatars')
+    base_game_cover_path: Path = Path('covers')
 
 
 storage_settings = StorageSettings()

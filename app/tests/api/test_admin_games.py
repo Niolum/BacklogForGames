@@ -1,11 +1,15 @@
 from http import HTTPStatus
 from pathlib import Path
 
+import pytest
 from httpx import AsyncClient
 from starlette.requests import Request
 
 from adapters.databases.in_memory.repositories.games.game import InMemGameRepo
+from config import storage_settings
 from domain.models import Game, Genre
+from domain.services import GameCoverData
+from entrypoints.fastapi.admin import game as game_admin
 from entrypoints.fastapi.admin.game import GameAdmin
 
 
@@ -122,6 +126,93 @@ async def test_admin_update_changes_fields_and_can_hide_game(
     assert [item.name for item in stored.genres] == ['Strategy']
     assert catalog.json() == {'items': [], 'total': 0}
     assert card.status_code == HTTPStatus.NOT_FOUND
+
+
+async def test_admin_cover_is_returned_by_the_list_and_the_card(
+    admin_client: AsyncClient,
+    stored_genre: Genre,
+) -> None:
+    """Uploading a cover stores the file and both catalog responses return its path."""
+    response = await admin_client.post(
+        '/admin/game/create',
+        data={
+            'title': 'Planescape',
+            'genres': [str(stored_genre.id)],
+            'is_published': 'on',
+            'save': 'Save',
+        },
+        files={'cover': ('cover.png', b'png-bytes', 'image/png')},
+    )
+    listed = await admin_client.get('/games')
+    item = listed.json()['items'][0]
+    card = await admin_client.get(f'/games/{item["uuid"]}')
+
+    assert response.status_code == HTTPStatus.FOUND
+    assert item['cover_url'].endswith('.png')
+    assert card.status_code == HTTPStatus.OK
+    assert card.json()['cover_url'] == item['cover_url']
+    assert (storage_settings.local_root / item['cover_url']).read_bytes() == b'png-bytes'
+
+
+async def test_admin_cover_replace_removes_the_previous_file(
+    admin_client: AsyncClient,
+    stored_genre: Genre,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A new cover replaces the stored file and the catalog returns the new path."""
+    created = await admin_client.post(
+        '/admin/game/create',
+        data={'title': 'Planescape', 'genres': [str(stored_genre.id)], 'is_published': 'on', 'save': 'Save'},
+        files={'cover': ('cover.png', b'png-bytes', 'image/png')},
+    )
+    assert created.status_code == HTTPStatus.FOUND
+    stored = next(iter(InMemGameRepo.DB.values()))
+    assert stored.cover_url is not None
+    previous = storage_settings.local_root / stored.cover_url
+
+    async def cover_bytes(_cover: object) -> GameCoverData:
+        """Cover supplied instead of a form file."""
+        return GameCoverData(content=b'gif-bytes', content_type='image/gif')
+
+    monkeypatch.setattr(game_admin, '_cover_bytes', cover_bytes)
+    await GameAdmin().update_model(
+        _request(),
+        str(stored.id),
+        {
+            'title': stored.title,
+            'is_published': True,
+            'genres': [str(stored_genre.id)],
+        },
+    )
+    listed = await admin_client.get('/games')
+    item = listed.json()['items'][0]
+    card = await admin_client.get(f'/games/{stored.uuid}')
+
+    assert not previous.exists()
+    assert item['cover_url'].endswith('.gif')
+    assert card.json()['cover_url'] == item['cover_url']
+    assert (storage_settings.local_root / item['cover_url']).read_bytes() == b'gif-bytes'
+
+
+async def test_admin_create_rejects_empty_and_unsupported_cover(admin_client: AsyncClient) -> None:
+    """An empty or unsupported cover is refused and the game is not stored."""
+    empty = await admin_client.post(
+        '/admin/game/create',
+        data={'title': 'Planescape', 'is_published': 'on', 'save': 'Save'},
+        files={'cover': ('cover.png', b'', 'image/png')},
+    )
+    unsupported = await admin_client.post(
+        '/admin/game/create',
+        data={'title': 'Planescape', 'is_published': 'on', 'save': 'Save'},
+        files={'cover': ('notes.txt', b'hello', 'text/plain')},
+    )
+
+    assert empty.status_code == HTTPStatus.BAD_REQUEST
+    assert 'Cover file is empty' in empty.text
+    assert unsupported.status_code == HTTPStatus.BAD_REQUEST
+    assert 'Unsupported cover file type' in unsupported.text
+    assert list(InMemGameRepo.DB) == []
+    assert list(storage_settings.local_root.iterdir()) == []
 
 
 def _request() -> Request:
