@@ -29,6 +29,7 @@ httpx = "^0.28.1"
 pytest-cov = "^7.1.0"
 types-aiofiles = "^25.1.0.20260518"
 types-aioboto3 = {extras = ["s3"], version = "^15.5.0"}
+pytest-env = "^1.8.0"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -36,6 +37,9 @@ asyncio_default_fixture_loop_scope = "function"
 testpaths = ["app/tests"]
 pythonpath = ["app"]
 addopts = "--cov --cov-report=term-missing"
+
+[tool.pytest_env]
+RAWG_CONFIG__API_KEY = "test-rawg-key"
 
 [tool.coverage.run]
 branch = true
