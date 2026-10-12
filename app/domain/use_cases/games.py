@@ -5,7 +5,7 @@ from dependency_injector.wiring import Provide, inject
 from domain.exceptions import GameNotFoundError
 from domain.interfaces.uow import UnitOfWork
 from domain.models import Game, GamePage
-from domain.services import GameChangeData, GameCreateData, GameService
+from domain.services import GameChangeData, GameCoverData, GameCreateData, GameService
 
 
 @inject
@@ -39,21 +39,23 @@ async def get_game_by_uuid(
 @inject
 async def create_game(
     data: GameCreateData,
+    cover: GameCoverData | None = None,
     uow: UnitOfWork = Provide['uow'],
     game_service: GameService = Provide['game_service'],
 ) -> Game:
     """Create a game from the admin panel."""
     async with uow:
-        return await game_service.create_game(data)
+        return await game_service.create_game(data, cover=cover)
 
 
 @inject
 async def update_game(
     game_id: int,
     data: GameChangeData,
+    cover: GameCoverData | None = None,
     uow: UnitOfWork = Provide['uow'],
     game_service: GameService = Provide['game_service'],
 ) -> Game:
     """Change a game from the admin panel."""
     async with uow:
-        return await game_service.update_game(game_id, data)
+        return await game_service.update_game(game_id, data, cover=cover)

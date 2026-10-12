@@ -60,3 +60,10 @@ class GameCreateData(GameFormData):
 
 class GameChangeData(GameFormData):
     """Fields edited in the admin panel."""
+
+
+class GameCoverData(BaseModel):
+    """Cover file uploaded with a game form."""
+
+    content: bytes = Field(description='Cover file bytes')
+    content_type: str | None = Field(default=None, description='Cover content type')

@@ -4,10 +4,12 @@ from pathlib import Path
 import pytest
 
 from adapters.databases.in_memory.repositories.games.game import InMemGameRepo
+from config import storage_settings
 from deps.container import DIContainer
-from domain.exceptions import GameNotFoundError, GenreNotFoundError
+from domain.constants import COVER_MAX_BYTES
+from domain.exceptions import GameNotFoundError, GenreNotFoundError, UploadFileTypeError, UploadGameCoverError
 from domain.models import Game, Genre
-from domain.services import GameChangeData, GameCreateData
+from domain.services import GameChangeData, GameCoverData, GameCreateData
 
 
 async def test_create_game_stores_fields_and_genres(
@@ -118,3 +120,28 @@ async def test_update_game_rejects_unknown_id(di_container: DIContainer, game: G
     """An unknown id raises not found."""
     with pytest.raises(GameNotFoundError, match=f'Game with id={game.id} not found'):
         await di_container.game_service().update_game(game.id, GameChangeData(title='Torment'))
+
+
+async def test_create_game_rejects_bad_cover(di_container: DIContainer) -> None:
+    """An empty, oversized, or unsupported cover is not stored."""
+    service = di_container.game_service()
+    oversized = b'a' * (COVER_MAX_BYTES + 1)
+
+    with pytest.raises(UploadGameCoverError, match='Cover file is empty'):
+        await service.create_game(
+            GameCreateData(title='Planescape'),
+            cover=GameCoverData(content=b'', content_type='image/png'),
+        )
+    with pytest.raises(UploadGameCoverError, match='Cover file is too large'):
+        await service.create_game(
+            GameCreateData(title='Planescape'),
+            cover=GameCoverData(content=oversized, content_type='image/png'),
+        )
+    with pytest.raises(UploadFileTypeError, match='Unsupported cover file type'):
+        await service.create_game(
+            GameCreateData(title='Planescape'),
+            cover=GameCoverData(content=b'hello', content_type='text/plain'),
+        )
+
+    assert list(InMemGameRepo.DB) == []
+    assert list(storage_settings.local_root.iterdir()) == []

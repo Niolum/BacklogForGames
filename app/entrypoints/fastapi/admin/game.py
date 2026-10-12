@@ -1,12 +1,22 @@
+from inspect import isawaitable
 from typing import override
 
 from sqladmin import ModelView
 from starlette.requests import Request
-from wtforms import BooleanField, DateField, Form, IntegerField, SelectMultipleField, StringField, TextAreaField
+from wtforms import (
+    BooleanField,
+    DateField,
+    FileField,
+    Form,
+    IntegerField,
+    SelectMultipleField,
+    StringField,
+    TextAreaField,
+)
 from wtforms.validators import InputRequired, Optional
 
 from adapters.databases.sqlalchemy.models import GameORM
-from domain.services import GameChangeData, GameCreateData
+from domain.services import GameChangeData, GameCoverData, GameCreateData
 from domain.use_cases import create_game, get_genres, update_game
 
 
@@ -63,20 +73,44 @@ class GameAdmin(ModelView, model=GameORM):
             publisher = StringField('Publisher', validators=[Optional()])
             genres = SelectMultipleField('Genres', choices=choices, coerce=int)
             is_published = BooleanField('Published', default=True)
+            cover = FileField('Cover', validators=[Optional()])
 
         return GameAdminForm
 
     @override
     async def insert_model(self, request: Request, data: dict) -> GameORM:
         """Create a game through the domain service."""
-        game = await create_game(GameCreateData.model_validate(data))
+        cover = await _cover_bytes(data.get('cover'))
+        game = await create_game(GameCreateData.model_validate(data), cover=cover)
         return GameORM.from_model(game)
 
     @override
     async def update_model(self, request: Request, pk: str, data: dict) -> GameORM:
         """Change a game through the domain service."""
-        game = await update_game(int(pk), GameChangeData.model_validate(data))
+        cover = await _cover_bytes(data.get('cover'))
+        game = await update_game(int(pk), GameChangeData.model_validate(data), cover=cover)
         return GameORM.from_model(game)
 
 
 GameAdmin.identity = 'game'
+
+
+async def _cover_bytes(cover: object) -> GameCoverData | None:
+    """Return an uploaded cover, or nothing when the form has no file."""
+    if cover is None or isinstance(cover, str):
+        return None
+    filename = getattr(cover, 'filename', None)
+    if not isinstance(filename, str) or filename == '':
+        return None
+    read = getattr(cover, 'read', None)
+    if not callable(read):
+        return None
+    content = read()
+    if isawaitable(content):
+        content = await content
+    if not isinstance(content, bytes):
+        return None
+    content_type = getattr(cover, 'content_type', None)
+    if not isinstance(content_type, str):
+        content_type = None
+    return GameCoverData(content=content, content_type=content_type)
