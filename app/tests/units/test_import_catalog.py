@@ -246,9 +246,12 @@ async def test_import_rejects_a_genre_name_owned_by_another_external_pair(di_con
 
 
 async def test_import_updates_the_rawg_game_and_leaves_other_games(di_container: DIContainer) -> None:
-    """A second run updates the RAWG game and leaves a game without that pair unchanged."""
+    """A second run updates the RAWG row and leaves a game without that pair unchanged."""
     moment = datetime(2026, 10, 9, tzinfo=UTC)
+    metacritic = 91
+    genre_id = 5
     cover = Path('covers/keep.png')
+    previous = Genre(id=3, name='Strategy')
     manual = Game(
         id=1,
         uuid=GAME_UUID,
@@ -264,18 +267,33 @@ async def test_import_updates_the_rawg_game_and_leaves_other_games(di_container:
         is_published=False,
         external_source=RAWG_SOURCE,
         external_id='7',
+        genres=[previous],
         created_at=moment,
         updated_at=moment,
     )
+    await InMemGenreRepo().create(previous)
     await InMemGameRepo().create(manual)
     await InMemGameRepo().create(imported)
     fetcher = _fetcher(di_container)
     fetcher.add_response(
         HTTPMethod.GET,
         'games',
-        _page([_listed(7, 'New title', [], released='1999-12-06', metacritic=91)], next_page=None),
+        _page(
+            [_listed(7, 'New title', [genre_id], released='1999-12-06', metacritic=metacritic)],
+            next_page=None,
+        ),
     )
-    fetcher.add_response(HTTPMethod.GET, 'games/7', {'id': 7, 'description': 'A story'})
+    _add_genre(fetcher, genre_id, 'RPG', 'Role-playing')
+    fetcher.add_response(
+        HTTPMethod.GET,
+        'games/7',
+        {
+            'id': 7,
+            'description': 'A story',
+            'developers': [{'id': 3, 'name': 'Black Isle'}, {'id': 8, 'name': 'Ignored'}],
+            'publishers': [{'id': 4, 'name': 'Interplay'}],
+        },
+    )
 
     await import_catalog(1)
 
@@ -285,7 +303,13 @@ async def test_import_updates_the_rawg_game_and_leaves_other_games(di_container:
     assert stored.id == imported.id
     assert stored.uuid == SECOND_GAME_UUID
     assert stored.title == 'New title'
+    assert stored.release_date == date(1999, 12, 6)
     assert stored.cover_url == cover
+    assert stored.metacritic == metacritic
+    assert stored.description == 'A story'
+    assert stored.developer == 'Black Isle'
+    assert stored.publisher == 'Interplay'
+    assert [genre.name for genre in stored.genres] == ['RPG']
     assert stored.is_published is False
     assert stored.created_at == moment
     assert stored.updated_at != moment
