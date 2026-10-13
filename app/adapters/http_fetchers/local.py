@@ -3,7 +3,7 @@ from typing import override
 
 from pydantic import BaseModel
 
-from domain.interfaces.http_fetcher import HttpAPIFetcher
+from domain.interfaces.http_fetcher import HttpAPIFetcher, HttpFile
 
 
 class LocalHttpCall(BaseModel):
@@ -23,11 +23,29 @@ class LocalHttpAPIFetcher(HttpAPIFetcher):
 
     def __init__(self) -> None:
         self.calls: list[LocalHttpCall] = []
-        self._responses: dict[tuple[str, str], object] = {}
+        self._responses: dict[tuple[str, str], list[object]] = {}
+        self._downloads: dict[str, HttpFile] = {}
 
     def add_response(self, method: HTTPMethod, path: str, payload: object) -> None:
-        """Remember the JSON body returned for this method and path."""
-        self._responses[(method.value, path.lstrip('/'))] = payload
+        """Remember a JSON body for this method and path.
+
+        Several bodies are returned in the order they were added. The last body stays for
+        further requests.
+        """
+        key = (method.value, path.lstrip('/'))
+        self._responses.setdefault(key, []).append(payload)
+
+    def add_download(self, url: str, content: bytes, content_type: str | None = None) -> None:
+        """Remember the file returned for this address."""
+        self._downloads[url] = HttpFile(content=content, content_type=content_type)
+
+    @override
+    async def download(self, url: str) -> HttpFile:
+        downloaded = self._downloads.get(url)
+        if downloaded is None:
+            msg = f'No local file for {url}'
+            raise LookupError(msg)
+        return downloaded
 
     @override
     async def make_request(
@@ -53,7 +71,10 @@ class LocalHttpAPIFetcher(HttpAPIFetcher):
             ),
         )
         key = (method.value, normalized)
-        if key not in self._responses:
+        payloads = self._responses.get(key)
+        if not payloads:
             msg = f'No local response for {method.value} {normalized}'
             raise LookupError(msg)
-        return self._responses[key]
+        if len(payloads) > 1:
+            return payloads.pop(0)
+        return payloads[0]

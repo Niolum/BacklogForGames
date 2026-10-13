@@ -1,6 +1,6 @@
 from datetime import date
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class RawgModel(BaseModel):
@@ -39,7 +39,15 @@ class RawgCompany(RawgModel):
     """Developer or publisher on a RAWG game card."""
 
     id: int
-    name: str
+    name: str | None = None
+
+    @field_validator('name')
+    @classmethod
+    def empty_name_is_none(cls, name: str | None) -> str | None:
+        """An empty name is no name."""
+        if name == '':
+            return None
+        return name
 
 
 class RawgGameCard(RawgModel):
@@ -50,6 +58,28 @@ class RawgGameCard(RawgModel):
     developers: list[RawgCompany] = Field(default_factory=list)
     publishers: list[RawgCompany] = Field(default_factory=list)
 
+    @field_validator('description')
+    @classmethod
+    def empty_description_is_none(cls, description: str | None) -> str | None:
+        """An empty description is no description."""
+        if description == '':
+            return None
+        return description
+
+    @property
+    def developer(self) -> str | None:
+        """Name of the first developer."""
+        if not self.developers:
+            return None
+        return self.developers[0].name
+
+    @property
+    def publisher(self) -> str | None:
+        """Name of the first publisher."""
+        if not self.publishers:
+            return None
+        return self.publishers[0].name
+
 
 class RawgGenreCard(RawgModel):
     """One genre from GET /api/genres/{id}."""
@@ -57,3 +87,11 @@ class RawgGenreCard(RawgModel):
     id: int
     name: str
     description: str | None = None
+
+    @field_validator('description')
+    @classmethod
+    def empty_description_is_none(cls, description: str | None) -> str | None:
+        """An empty description is no description."""
+        if description == '':
+            return None
+        return description

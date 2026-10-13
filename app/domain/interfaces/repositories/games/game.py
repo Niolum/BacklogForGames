@@ -33,6 +33,10 @@ class GameRepo(BaseRepo):
     async def get_by_uuid(self, game_uuid: UUID) -> Game | None:
         """Get by uuid."""
 
+    @abstractmethod
+    async def get_by_external(self, external_source: str, external_id: str) -> Game | None:
+        """Get by external source and external id."""
+
     async def get_by_uuid_or_raise(self, game_uuid: UUID) -> Game:
         """Get by uuid or raise exception."""
         game = await self.get_by_uuid(game_uuid)

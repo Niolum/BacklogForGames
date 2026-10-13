@@ -33,6 +33,13 @@ class SQLAGenreRepo(SQLABaseRepo, GenreRepo):
         return await self._get_genre(GenreORM.name == name)
 
     @override
+    async def get_by_external(self, external_source: str, external_id: str) -> Genre | None:
+        return await self._get_genre(
+            GenreORM.external_source == external_source,
+            GenreORM.external_id == external_id,
+        )
+
+    @override
     async def has_games(self, genre_id: int) -> bool:
         result = await self.session.execute(
             select(GameGenreORM.game_id).where(GameGenreORM.genre_id == genre_id).limit(1),

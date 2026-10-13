@@ -43,14 +43,22 @@ RAWG_CONFIG__API_KEY = "test-rawg-key"
 
 [tool.coverage.run]
 branch = true
-source = ["adapters", "dependencies", "domain", "entrypoints"]
+source = [ "app/domain/use_cases/", "app/domain/services/"]
 
 [tool.coverage.report]
 show_missing = true
 omit = [
+    "__init__.py",
     "*/alembic/*",
     "*/domain/logger/*",
     "*/config/*",
+    "*/adapters/*",
+]
+exclude_also = [
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "@(abc\\.)?abstractmethod",
 ]
 
 [tool.mypy]
