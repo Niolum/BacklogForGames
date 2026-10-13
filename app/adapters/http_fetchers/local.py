@@ -23,11 +23,16 @@ class LocalHttpAPIFetcher(HttpAPIFetcher):
 
     def __init__(self) -> None:
         self.calls: list[LocalHttpCall] = []
-        self._responses: dict[tuple[str, str], object] = {}
+        self._responses: dict[tuple[str, str], list[object]] = {}
 
     def add_response(self, method: HTTPMethod, path: str, payload: object) -> None:
-        """Remember the JSON body returned for this method and path."""
-        self._responses[(method.value, path.lstrip('/'))] = payload
+        """Remember a JSON body for this method and path.
+
+        Several bodies are returned in the order they were added. The last body stays for
+        further requests.
+        """
+        key = (method.value, path.lstrip('/'))
+        self._responses.setdefault(key, []).append(payload)
 
     @override
     async def make_request(
@@ -53,7 +58,10 @@ class LocalHttpAPIFetcher(HttpAPIFetcher):
             ),
         )
         key = (method.value, normalized)
-        if key not in self._responses:
+        payloads = self._responses.get(key)
+        if not payloads:
             msg = f'No local response for {method.value} {normalized}'
             raise LookupError(msg)
-        return self._responses[key]
+        if len(payloads) > 1:
+            return payloads.pop(0)
+        return payloads[0]

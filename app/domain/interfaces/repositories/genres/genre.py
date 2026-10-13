@@ -33,6 +33,10 @@ class GenreRepo(BaseRepo):
         """Get by name."""
 
     @abstractmethod
+    async def get_by_external(self, external_source: str, external_id: str) -> Genre | None:
+        """Get by external source and external id."""
+
+    @abstractmethod
     async def has_games(self, genre_id: int) -> bool:
         """Return whether any game references this genre."""
 

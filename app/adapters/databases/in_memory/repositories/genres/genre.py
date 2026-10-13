@@ -24,6 +24,10 @@ class InMemGenreRepo(InMemBaseRepo[Genre], GenreRepo):
         return self._get(name=name)
 
     @override
+    async def get_by_external(self, external_source: str, external_id: str) -> Genre | None:
+        return self._get(external_source=external_source, external_id=external_id)
+
+    @override
     async def has_games(self, genre_id: int) -> bool:
         from adapters.databases.in_memory.repositories.games.game import InMemGameRepo
 

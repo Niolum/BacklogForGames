@@ -2,6 +2,7 @@ from .app import DEFAULT_LIMIT, Environment
 from .auth import ACCESS_TOKEN_TTL, JWT_ALGORITHM
 from .email_confirmation import EMAIL_CONFIRMATION_TOKEN_BYTES, EMAIL_CONFIRMATION_TTL
 from .game import COVER_EXTENSIONS, COVER_MAX_BYTES
+from .rawg import RAWG_MAX_PAGE_SIZE, RAWG_SOURCE
 from .user import AVATAR_EXTENSIONS, AVATAR_MAX_BYTES, PASSWORD_MAX_BYTES
 
 
@@ -16,5 +17,7 @@ __all__ = (
     'EMAIL_CONFIRMATION_TTL',
     'JWT_ALGORITHM',
     'PASSWORD_MAX_BYTES',
+    'RAWG_MAX_PAGE_SIZE',
+    'RAWG_SOURCE',
     'Environment',
 )
