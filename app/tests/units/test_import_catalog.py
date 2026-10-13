@@ -7,12 +7,12 @@ import pytest
 from adapters.databases.in_memory.repositories.games.game import InMemGameRepo
 from adapters.databases.in_memory.repositories.genres.genre import InMemGenreRepo
 from adapters.http_fetchers import LocalHttpAPIFetcher
-from config import rawg_settings
+from config import rawg_settings, storage_settings
 from deps.container import DIContainer
-from domain.constants import RAWG_MAX_PAGE_SIZE, RAWG_SOURCE
+from domain.constants import COVER_MAX_BYTES, RAWG_MAX_PAGE_SIZE, RAWG_SOURCE
 from domain.exceptions import BadRequestError, GenreNameAlreadyTakenError
 from domain.models import Game, Genre
-from domain.use_cases import import_catalog
+from domain.use_cases import get_game_by_uuid, get_games, import_catalog
 from tests.fixtures.game import GAME_UUID, SECOND_GAME_UUID
 
 
@@ -246,7 +246,7 @@ async def test_import_rejects_a_genre_name_owned_by_another_external_pair(di_con
 
 
 async def test_import_updates_the_rawg_game_and_leaves_other_games(di_container: DIContainer) -> None:
-    """A second run updates the RAWG row and leaves a game without that pair unchanged."""
+    """A second run updates the RAWG row. An unavailable cover leaves the stored file."""
     moment = datetime(2026, 10, 9, tzinfo=UTC)
     metacritic = 91
     genre_id = 5
@@ -317,6 +317,104 @@ async def test_import_updates_the_rawg_game_and_leaves_other_games(di_container:
     assert len(InMemGameRepo.DB) == stored_games
 
 
+async def test_import_saves_the_cover_and_returns_its_path(di_container: DIContainer) -> None:
+    """A supported background image is stored and returned by the list and the card."""
+    image_url = 'https://example.test/cover.jpg'
+    fetcher = _fetcher(di_container)
+    fetcher.add_response(
+        HTTPMethod.GET,
+        'games',
+        _page([_listed(1, 'Planescape', [], background_image=image_url)], next_page=None),
+    )
+    fetcher.add_response(HTTPMethod.GET, 'games/1', {'id': 1, 'description': 'A story'})
+    fetcher.add_download(image_url, b'jpeg-bytes', 'image/jpeg; charset=binary')
+
+    await import_catalog(1)
+
+    stored = await InMemGameRepo().get_by_external(RAWG_SOURCE, '1')
+    assert stored is not None
+    assert stored.cover_url == Path('covers') / f'{stored.uuid}.jpg'
+    assert stored.cover_url is not None
+    assert (storage_settings.local_root / stored.cover_url).read_bytes() == b'jpeg-bytes'
+    page_limit = 20
+    page = await get_games(limit=page_limit, offset=0)
+    assert page.items[0].cover_url == stored.cover_url
+    card = await get_game_by_uuid(stored.uuid)
+    assert card.cover_url == stored.cover_url
+
+
+async def test_import_replaces_the_previous_cover_file(di_container: DIContainer) -> None:
+    """A new cover replaces the stored file and removes the previous one."""
+    image_url = 'https://example.test/cover.gif'
+    moment = datetime(2026, 10, 9, tzinfo=UTC)
+    previous = storage_settings.local_root / 'covers' / 'keep.png'
+    previous.parent.mkdir(parents=True)
+    previous.write_bytes(b'old')
+    imported = Game(
+        id=1,
+        uuid=GAME_UUID,
+        title='Old title',
+        cover_url=Path('covers/keep.png'),
+        external_source=RAWG_SOURCE,
+        external_id='7',
+        created_at=moment,
+        updated_at=moment,
+    )
+    await InMemGameRepo().create(imported)
+    fetcher = _fetcher(di_container)
+    fetcher.add_response(
+        HTTPMethod.GET,
+        'games',
+        _page([_listed(7, 'Planescape', [], background_image=image_url)], next_page=None),
+    )
+    fetcher.add_response(HTTPMethod.GET, 'games/7', {'id': 7, 'description': 'A story'})
+    fetcher.add_download(image_url, b'gif-bytes', 'image/gif')
+
+    await import_catalog(1)
+
+    stored = await InMemGameRepo().get_by_external(RAWG_SOURCE, '7')
+    assert stored is not None
+    assert stored.cover_url == Path('covers') / f'{GAME_UUID}.gif'
+    assert stored.cover_url is not None
+    assert (storage_settings.local_root / stored.cover_url).read_bytes() == b'gif-bytes'
+    assert not previous.exists()
+
+
+async def test_import_keeps_the_game_when_the_cover_cannot_be_saved(di_container: DIContainer) -> None:
+    """A missing, empty, oversized, or unsupported cover still saves the game."""
+    missing_url = None
+    fetcher = _fetcher(di_container)
+    fetcher.add_response(
+        HTTPMethod.GET,
+        'games',
+        _page(
+            [
+                _listed(1, 'Planescape', [], background_image=missing_url),
+                _listed(2, 'Torment', [], background_image=''),
+                _listed(3, 'Disco', [], background_image='https://example.test/notes.txt'),
+                _listed(4, 'Empty', [], background_image='https://example.test/empty.jpg'),
+                _listed(5, 'Bare', [], background_image='https://example.test/bare.jpg'),
+                _listed(6, 'Huge', [], background_image='https://example.test/huge.jpg'),
+            ],
+            next_page=None,
+        ),
+    )
+    for game_id in range(1, 7):
+        fetcher.add_response(HTTPMethod.GET, f'games/{game_id}', {'id': game_id, 'description': 'A story'})
+    fetcher.add_download('https://example.test/notes.txt', b'notes', 'text/plain')
+    fetcher.add_download('https://example.test/empty.jpg', b'', 'image/jpeg')
+    fetcher.add_download('https://example.test/bare.jpg', b'jpeg-bytes', None)
+    fetcher.add_download('https://example.test/huge.jpg', b'x' * (COVER_MAX_BYTES + 1), 'image/jpeg')
+
+    limit = 6
+    await import_catalog(limit)
+
+    for external_id in ('1', '2', '3', '4', '5', '6'):
+        stored = await InMemGameRepo().get_by_external(RAWG_SOURCE, external_id)
+        assert stored is not None
+        assert stored.cover_url is None
+
+
 def _fetcher(di_container: DIContainer) -> LocalHttpAPIFetcher:
     """Return the local fetcher selected for tests."""
     fetcher = di_container.http_fetcher()
@@ -337,12 +435,13 @@ def _listed(
     *,
     released: str | None = '1999-12-06',
     metacritic: int | None = 91,
+    background_image: str | None = 'https://example.test/cover.jpg',
 ) -> dict[str, object]:
     return {
         'id': game_id,
         'name': name,
         'released': released,
-        'background_image': 'https://example.test/cover.jpg',
+        'background_image': background_image,
         'metacritic': metacritic,
         'genres': [{'id': genre_id} for genre_id in genre_ids],
     }

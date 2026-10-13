@@ -73,4 +73,9 @@ class DIContainer(DeclarativeContainer):
         development=async_http_fetcher,
         testing=local_http_fetcher,
     )
-    rawg_service = providers.Factory(RawgService.factory, uow=uow, http_fetcher=http_fetcher)
+    rawg_service = providers.Factory(
+        RawgService.factory,
+        uow=uow,
+        http_fetcher=http_fetcher,
+        file_storage=file_storage,
+    )

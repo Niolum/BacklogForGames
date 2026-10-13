@@ -3,7 +3,7 @@ from typing import override
 
 import httpx
 
-from domain.interfaces.http_fetcher import HttpAPIFetcher
+from domain.interfaces.http_fetcher import HttpAPIFetcher, HttpFile
 from domain.logger import logger
 
 
@@ -12,6 +12,18 @@ class AsyncHttpAPIFetcher(HttpAPIFetcher):
 
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip('/')
+
+    @override
+    async def download(self, url: str) -> HttpFile:
+        logger.debug('HTTP GET %s', url)
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url)
+                response.raise_for_status()
+        except httpx.HTTPError as exc:
+            msg = 'File download failed'
+            raise LookupError(msg) from exc
+        return HttpFile(content=response.content, content_type=response.headers.get('content-type'))
 
     @override
     async def make_request(

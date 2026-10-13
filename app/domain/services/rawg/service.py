@@ -2,24 +2,33 @@ from datetime import datetime
 from http import HTTPMethod
 from uuid import uuid4
 
-from config import rawg_settings, settings
-from domain.constants import RAWG_MAX_PAGE_SIZE, RAWG_SOURCE
-from domain.exceptions import BadRequestError, GenreNameAlreadyTakenError
+from config import rawg_settings, settings, storage_settings
+from domain.constants import COVER_EXTENSIONS, COVER_MAX_BYTES, RAWG_MAX_PAGE_SIZE, RAWG_SOURCE
+from domain.exceptions import BadRequestError, GenreNameAlreadyTakenError, UploadFileTypeError, UploadGameCoverError
 from domain.interfaces.http_fetcher import HttpAPIFetcher
 from domain.interfaces.repositories import GameRepo, GenreRepo
+from domain.interfaces.storage import FileStorage
 from domain.logger import logger
 from domain.models import Game, Genre
 from domain.services.base import BaseService
+from domain.services.games.types import GameCoverData
 from .types import RawgGameCard, RawgGamesPage, RawgGenreCard, RawgListedGame
 
 
 class RawgService(BaseService):
     """Reads RAWG and imports a limited number of games with their genres."""
 
-    def __init__(self, genres: GenreRepo, games: GameRepo, http_fetcher: HttpAPIFetcher):
+    def __init__(
+        self,
+        genres: GenreRepo,
+        games: GameRepo,
+        http_fetcher: HttpAPIFetcher,
+        file_storage: FileStorage,
+    ):
         self.genre_repo: GenreRepo = genres
         self.game_repo: GameRepo = games
         self.http_fetcher: HttpAPIFetcher = http_fetcher
+        self.file_storage: FileStorage = file_storage
 
     async def get_games_page(self, *, page: int = 1, page_size: int) -> RawgGamesPage:
         """Return one page of games. The next page is not requested."""
@@ -86,7 +95,8 @@ class RawgService(BaseService):
     async def _import_listed_game(self, listed: RawgListedGame) -> tuple[int, bool]:
         genres, created_genres = await self._genres(listed)
         card = await self.get_game(listed.id)
-        updated = await self._save_game(listed, card, genres)
+        game, updated = await self._save_game(listed, card, genres)
+        await self._apply_cover(game, listed.background_image)
         return created_genres, updated
 
     async def _genres(self, listed: RawgListedGame) -> tuple[list[Genre], int]:
@@ -128,7 +138,49 @@ class RawgService(BaseService):
         msg = f'Genre with name={name} already exists'
         raise GenreNameAlreadyTakenError(msg)
 
-    async def _save_game(self, listed: RawgListedGame, card: RawgGameCard, genres: list[Genre]) -> bool:
+    async def _apply_cover(self, game: Game, image_url: str | None) -> None:
+        if image_url is None or image_url == '':
+            return
+        try:
+            downloaded = await self.http_fetcher.download(image_url)
+            await self._store_cover(
+                game,
+                GameCoverData(content=downloaded.content, content_type=downloaded.content_type),
+            )
+        except (LookupError, UploadFileTypeError, UploadGameCoverError):
+            logger.warning('RAWG cover for game %s was not saved', game.external_id)
+
+    async def _store_cover(self, game: Game, cover: GameCoverData) -> None:
+        extension = self._cover_extension(cover)
+        if not cover.content:
+            msg = 'Cover file is empty'
+            raise UploadGameCoverError(msg)
+        if len(cover.content) > COVER_MAX_BYTES:
+            msg = 'Cover file is too large'
+            raise UploadGameCoverError(msg)
+        path = storage_settings.base_game_cover_path / f'{game.uuid}{extension}'
+        await self.file_storage.save(path, cover.content)
+        previous = game.cover_url
+        await self.game_repo.update(
+            game.model_copy(
+                update={'cover_url': path, 'updated_at': datetime.now(settings.default_timezone)},
+            ),
+        )
+        if previous is not None and previous != path:
+            await self.file_storage.delete(previous)
+
+    def _cover_extension(self, cover: GameCoverData) -> str:
+        if not cover.content_type:
+            msg = 'Unsupported cover file type'
+            raise UploadFileTypeError(msg)
+        media_type = cover.content_type.split(';', maxsplit=1)[0].strip().lower()
+        extension = COVER_EXTENSIONS.get(media_type)
+        if extension is None:
+            msg = 'Unsupported cover file type'
+            raise UploadFileTypeError(msg)
+        return extension
+
+    async def _save_game(self, listed: RawgListedGame, card: RawgGameCard, genres: list[Genre]) -> tuple[Game, bool]:
         description = card.description
         developer = card.developer
         publisher = card.publisher
@@ -136,39 +188,37 @@ class RawgService(BaseService):
         external_id = str(listed.id)
         existing = await self.game_repo.get_by_external(RAWG_SOURCE, external_id)
         if existing is None:
-            await self.game_repo.create(
-                Game(
-                    id=await self.game_repo.get_next_id(),
-                    uuid=uuid4(),
-                    title=listed.name,
-                    release_date=listed.released,
-                    description=description,
-                    metacritic=listed.metacritic,
-                    developer=developer,
-                    publisher=publisher,
-                    is_published=True,
-                    external_source=RAWG_SOURCE,
-                    external_id=external_id,
-                    genres=genres,
-                    updated_at=updated_at,
-                ),
+            game = Game(
+                id=await self.game_repo.get_next_id(),
+                uuid=uuid4(),
+                title=listed.name,
+                release_date=listed.released,
+                description=description,
+                metacritic=listed.metacritic,
+                developer=developer,
+                publisher=publisher,
+                is_published=True,
+                external_source=RAWG_SOURCE,
+                external_id=external_id,
+                genres=genres,
+                updated_at=updated_at,
             )
-            return False
-        await self.game_repo.update(
-            existing.model_copy(
-                update={
-                    'title': listed.name,
-                    'release_date': listed.released,
-                    'description': description,
-                    'metacritic': listed.metacritic,
-                    'developer': developer,
-                    'publisher': publisher,
-                    'genres': genres,
-                    'updated_at': updated_at,
-                },
-            ),
+            await self.game_repo.create(game)
+            return game, False
+        game = existing.model_copy(
+            update={
+                'title': listed.name,
+                'release_date': listed.released,
+                'description': description,
+                'metacritic': listed.metacritic,
+                'developer': developer,
+                'publisher': publisher,
+                'genres': genres,
+                'updated_at': updated_at,
+            },
         )
-        return True
+        await self.game_repo.update(game)
+        return game, True
 
     def _params(self, extra: dict[str, int] | None = None) -> dict[str, str | int]:
         params: dict[str, str | int] = {'key': rawg_settings.api_key.get_secret_value()}

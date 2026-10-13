@@ -1,9 +1,22 @@
 from abc import ABC, abstractmethod
 from http import HTTPMethod
 
+from pydantic import BaseModel
+
+
+class HttpFile(BaseModel):
+    """Bytes of one downloaded file."""
+
+    content: bytes
+    content_type: str | None = None
+
 
 class HttpAPIFetcher(ABC):
     """Port for one HTTP request."""
+
+    @abstractmethod
+    async def download(self, url: str) -> HttpFile:
+        """Download one file and return its bytes and content type."""
 
     @abstractmethod
     async def make_request(
