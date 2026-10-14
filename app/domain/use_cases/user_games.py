@@ -43,6 +43,18 @@ async def add_to_backlog(
         return await user_game_service.add_to_backlog(user, data)
 
 
+@inject
+async def add_to_completed(
+    user: User,
+    data: AddUserGameData,
+    uow: UnitOfWork = Provide['uow'],
+    user_game_service: UserGameService = Provide['user_game_service'],
+) -> UserGame:
+    """Mark a game completed for the current user."""
+    async with uow:
+        return await user_game_service.add_to_completed(user, data)
+
+
 async def _user_games(
     user_uuid: UUID,
     status: UserGameStatus,

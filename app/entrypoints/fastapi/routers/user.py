@@ -7,6 +7,7 @@ from domain.models import UserGamePage
 from domain.services import AddUserGameData, UpdateProfileData
 from domain.use_cases import (
     add_to_backlog,
+    add_to_completed,
     delete_avatar,
     get_user_backlog,
     get_user_by_uuid,
@@ -64,6 +65,14 @@ async def add_to_backlog_handler(current_user: CurrentUser, request_data: AddUse
     """Add a game to the current user's backlog."""
     data = AddUserGameData.model_validate(request_data.model_dump())
     await add_to_backlog(current_user, data)
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+@user_router.post('/me/completed', status_code=status.HTTP_201_CREATED)
+async def add_to_completed_handler(current_user: CurrentUser, request_data: AddUserGameRequestSchema) -> Response:
+    """Mark a game completed for the current user."""
+    data = AddUserGameData.model_validate(request_data.model_dump())
+    await add_to_completed(current_user, data)
     return Response(status_code=status.HTTP_201_CREATED)
 
 
