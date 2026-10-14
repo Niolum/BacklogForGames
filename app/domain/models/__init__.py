@@ -4,6 +4,18 @@ from .game_genre import GameGenre
 from .genre import Genre
 from .mail import MailMessage
 from .user import User
+from .user_game import UserGame, UserGamePage, UserGameStatus
 
 
-__all__ = ['EmailConfirmation', 'Game', 'GameGenre', 'GamePage', 'Genre', 'MailMessage', 'User']
+__all__ = [
+    'EmailConfirmation',
+    'Game',
+    'GameGenre',
+    'GamePage',
+    'Genre',
+    'MailMessage',
+    'User',
+    'UserGame',
+    'UserGamePage',
+    'UserGameStatus',
+]
