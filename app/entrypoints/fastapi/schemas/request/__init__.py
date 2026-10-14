@@ -5,9 +5,11 @@ from .auth import (
     UserRegisterRequestSchema,
 )
 from .user import UpdateProfileRequestSchema
+from .user_game import AddUserGameRequestSchema
 
 
 __all__ = [
+    'AddUserGameRequestSchema',
     'ConfirmEmailRequestSchema',
     'LoginRequestSchema',
     'ResendConfirmationRequestSchema',

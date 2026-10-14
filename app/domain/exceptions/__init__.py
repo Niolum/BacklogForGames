@@ -11,7 +11,7 @@ from .file import InvalidFilePath, UploadFileTypeError
 from .game import GameNotFoundError, UploadGameCoverError
 from .genre import GenreHasGamesError, GenreNameAlreadyTakenError, GenreNotFoundError
 from .user import UploadUserAvatarError, UserNicknameAlreadyTakenError, UserNotFoundError
-from .user_game import UserGameNotFoundError
+from .user_game import UserGameAlreadyListedError, UserGameNotFoundError
 
 
 __all__ = (
@@ -32,6 +32,7 @@ __all__ = (
     'UploadFileTypeError',
     'UploadGameCoverError',
     'UploadUserAvatarError',
+    'UserGameAlreadyListedError',
     'UserGameNotFoundError',
     'UserNicknameAlreadyTakenError',
     'UserNotFoundError',
