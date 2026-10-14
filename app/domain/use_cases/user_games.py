@@ -55,6 +55,18 @@ async def add_to_completed(
         return await user_game_service.add_to_completed(user, data)
 
 
+@inject
+async def remove_from_list(
+    user: User,
+    game_uuid: UUID,
+    uow: UnitOfWork = Provide['uow'],
+    user_game_service: UserGameService = Provide['user_game_service'],
+) -> None:
+    """Remove a game from the current user's backlog or completed list."""
+    async with uow:
+        await user_game_service.remove_from_list(user, game_uuid)
+
+
 async def _user_games(
     user_uuid: UUID,
     status: UserGameStatus,

@@ -1,7 +1,8 @@
 from datetime import datetime
+from uuid import UUID
 
 from config import settings
-from domain.exceptions import UserGameAlreadyListedError
+from domain.exceptions import UserGameAlreadyListedError, UserGameNotFoundError
 from domain.interfaces.repositories import GameRepo, UserGameRepo
 from domain.models import User, UserGame, UserGameStatus
 from domain.services.base import BaseService
@@ -52,3 +53,12 @@ class UserGameService(BaseService):
         updated = existing.model_copy(update={'status': UserGameStatus.completed, 'completed_at': completed_at})
         await self.user_game_repo.update(updated)
         return updated
+
+    async def remove_from_list(self, user: User, game_uuid: UUID) -> None:
+        """Remove the current user's backlog or completed row for one game."""
+        game = await self.game_repo.get_by_uuid_or_raise(game_uuid)
+        existing = await self.user_game_repo.get_by_user_and_game(user.id, game.id)
+        if existing is None:
+            msg = f'Game with uuid={game_uuid} is not listed'
+            raise UserGameNotFoundError(msg)
+        await self.user_game_repo.delete(existing)

@@ -1,4 +1,5 @@
 from pathlib import Path
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -8,6 +9,7 @@ from entrypoints.fastapi.schemas.response.genre import GenreResponseSchema
 class UserGameItemResponseSchema(BaseModel):
     """Game shown in a user's backlog or completed list."""
 
+    uuid: UUID = Field(description='Game ID')
     cover_url: Path | None = Field(default=None, description='Cover URL')
     title: str = Field(description='Game title')
     genres: list[GenreResponseSchema] = Field(default_factory=list, description='Genres of the game')

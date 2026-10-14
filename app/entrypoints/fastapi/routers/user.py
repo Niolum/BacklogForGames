@@ -12,6 +12,7 @@ from domain.use_cases import (
     get_user_backlog,
     get_user_by_uuid,
     get_user_completed,
+    remove_from_list,
     update_profile,
     upload_avatar,
 )
@@ -74,6 +75,13 @@ async def add_to_completed_handler(current_user: CurrentUser, request_data: AddU
     data = AddUserGameData.model_validate(request_data.model_dump())
     await add_to_completed(current_user, data)
     return Response(status_code=status.HTTP_201_CREATED)
+
+
+@user_router.delete('/me/games/{game_uuid}')
+async def remove_from_list_handler(current_user: CurrentUser, game_uuid: UUID) -> Response:
+    """Remove a game from the current user's backlog or completed list."""
+    await remove_from_list(current_user, game_uuid)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @user_router.get('/{user_uuid}/backlog', response_model=UserGamePageResponseSchema)

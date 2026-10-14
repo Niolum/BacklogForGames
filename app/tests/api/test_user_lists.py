@@ -23,11 +23,12 @@ async def test_user_lists_return_cover_title_and_genres(
     listed_user: User,
     catalog: Catalog,
 ) -> None:
-    """Each list returns that user's games, ordered by title, with cover and genres."""
+    """Each list returns that user's games, ordered by title, with uuid, cover and genres."""
     backlog = await client.get(f'/users/{listed_user.uuid}/backlog')
     completed = await client.get(f'/users/{listed_user.uuid}/completed')
     backlog_items = [
         {
+            'uuid': str(catalog.disco.uuid),
             'cover_url': None,
             'title': catalog.disco.title,
             'genres': [
@@ -35,6 +36,7 @@ async def test_user_lists_return_cover_title_and_genres(
             ],
         },
         {
+            'uuid': str(catalog.planescape.uuid),
             'cover_url': 'covers/planescape.png',
             'title': catalog.planescape.title,
             'genres': [
@@ -49,6 +51,7 @@ async def test_user_lists_return_cover_title_and_genres(
     ]
     completed_items = [
         {
+            'uuid': str(catalog.torment.uuid),
             'cover_url': None,
             'title': catalog.torment.title,
             'genres': [
