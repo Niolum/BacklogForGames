@@ -3,7 +3,8 @@ from uuid import UUID
 from dependency_injector.wiring import Provide, inject
 
 from domain.interfaces.uow import UnitOfWork
-from domain.models import UserGamePage, UserGameStatus
+from domain.models import User, UserGame, UserGamePage, UserGameStatus
+from domain.services import AddUserGameData, UserGameService
 
 
 @inject
@@ -28,6 +29,18 @@ async def get_user_completed(
 ) -> UserGamePage:
     """Return one page of a user's completed games."""
     return await _user_games(user_uuid, UserGameStatus.completed, limit=limit, offset=offset, uow=uow)
+
+
+@inject
+async def add_to_backlog(
+    user: User,
+    data: AddUserGameData,
+    uow: UnitOfWork = Provide['uow'],
+    user_game_service: UserGameService = Provide['user_game_service'],
+) -> UserGame:
+    """Add a game to the current user's backlog."""
+    async with uow:
+        return await user_game_service.add_to_backlog(user, data)
 
 
 async def _user_games(

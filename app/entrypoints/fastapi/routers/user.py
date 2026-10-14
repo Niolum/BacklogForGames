@@ -4,8 +4,9 @@ from fastapi import APIRouter, Query, Response, UploadFile, status
 
 from domain.constants import DEFAULT_LIMIT
 from domain.models import UserGamePage
-from domain.services import UpdateProfileData
+from domain.services import AddUserGameData, UpdateProfileData
 from domain.use_cases import (
+    add_to_backlog,
     delete_avatar,
     get_user_backlog,
     get_user_by_uuid,
@@ -14,7 +15,7 @@ from domain.use_cases import (
     upload_avatar,
 )
 from entrypoints.fastapi.dependencies import CurrentUser
-from entrypoints.fastapi.schemas.request import UpdateProfileRequestSchema
+from entrypoints.fastapi.schemas.request import AddUserGameRequestSchema, UpdateProfileRequestSchema
 from entrypoints.fastapi.schemas.response import (
     PublicUserResponseSchema,
     UserGameItemResponseSchema,
@@ -56,6 +57,14 @@ async def delete_avatar_handler(current_user: CurrentUser) -> Response:
     """Remove the avatar of the current user."""
     await delete_avatar(current_user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@user_router.post('/me/backlog', status_code=status.HTTP_201_CREATED)
+async def add_to_backlog_handler(current_user: CurrentUser, request_data: AddUserGameRequestSchema) -> Response:
+    """Add a game to the current user's backlog."""
+    data = AddUserGameData.model_validate(request_data.model_dump())
+    await add_to_backlog(current_user, data)
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 @user_router.get('/{user_uuid}/backlog', response_model=UserGamePageResponseSchema)

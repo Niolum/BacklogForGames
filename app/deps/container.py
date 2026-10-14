@@ -8,7 +8,7 @@ from adapters.http_fetchers import AsyncHttpAPIFetcher, LocalHttpAPIFetcher
 from adapters.mail import LocalMailSender, SMTPMailSender
 from adapters.storage import LocalFileStorage, S3FileStorage
 from config import email_settings, rawg_settings, storage_settings
-from domain.services import AuthService, GameService, GenreService, RawgService, UserService
+from domain.services import AuthService, GameService, GenreService, RawgService, UserGameService, UserService
 
 
 class DIContainer(DeclarativeContainer):
@@ -64,6 +64,7 @@ class DIContainer(DeclarativeContainer):
     user_service = providers.Factory(UserService.factory, uow=uow, file_storage=file_storage)
     genre_service = providers.Factory(GenreService.factory, uow=uow)
     game_service = providers.Factory(GameService.factory, uow=uow, file_storage=file_storage)
+    user_game_service = providers.Factory(UserGameService.factory, uow=uow)
 
     local_http_fetcher = providers.Singleton(LocalHttpAPIFetcher)
     async_http_fetcher = providers.Singleton(AsyncHttpAPIFetcher, base_url=str(rawg_settings.base_url))
