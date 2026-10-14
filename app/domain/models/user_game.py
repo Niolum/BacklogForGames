@@ -5,6 +5,7 @@ from typing import Self
 from pydantic import AwareDatetime, BaseModel, Field, model_validator
 
 from config import settings
+from domain.models.game import Game
 
 
 class UserGameStatus(StrEnum):
@@ -34,3 +35,10 @@ class UserGame(BaseModel):
             msg = 'Backlog status requires an empty completed_at'
             raise ValueError(msg)
         return self
+
+
+class UserGamePage(BaseModel):
+    """One page of a user's list and the total number of matches."""
+
+    items: list[Game]
+    total: int

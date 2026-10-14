@@ -4,7 +4,7 @@ from .game_genre import GameGenre
 from .genre import Genre
 from .mail import MailMessage
 from .user import User
-from .user_game import UserGame, UserGameStatus
+from .user_game import UserGame, UserGamePage, UserGameStatus
 
 
 __all__ = [
@@ -16,5 +16,6 @@ __all__ = [
     'MailMessage',
     'User',
     'UserGame',
+    'UserGamePage',
     'UserGameStatus',
 ]
