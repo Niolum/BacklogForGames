@@ -12,4 +12,6 @@ pytest_plugins = [
     'tests.fixtures.game',
     'tests.fixtures.genre',
     'tests.fixtures.repositories',
+    'tests.fixtures.user',
+    'tests.fixtures.user_game',
 ]
