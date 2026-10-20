@@ -4,7 +4,7 @@ from dependency_injector.wiring import Provide, inject
 
 from domain.exceptions import GameNotFoundError
 from domain.interfaces.uow import UnitOfWork
-from domain.models import Game, GamePage
+from domain.models import Game, GameCard, GamePage, User
 from domain.services import GameChangeData, GameCoverData, GameCreateData, GameService
 
 
@@ -29,11 +29,34 @@ async def get_game_by_uuid(
 ) -> Game:
     """Load a published game by the public uuid."""
     async with uow:
-        game = await uow.games.get_by_uuid_or_raise(game_uuid)
-        if not game.is_published:
-            msg = f'Game with uuid={game_uuid} not found'
-            raise GameNotFoundError(msg)
-        return game
+        return await _published_game(game_uuid, uow)
+
+
+@inject
+async def get_game_card(
+    game_uuid: UUID,
+    user: User | None = None,
+    uow: UnitOfWork = Provide['uow'],
+) -> GameCard:
+    """Load a published game, the average of its scores, and the caller's score."""
+    async with uow:
+        game = await _published_game(game_uuid, uow)
+        summary = await uow.ratings.get_summary(game.id)
+        user_score = None
+        if user is not None:
+            rating = await uow.ratings.get_by_user_and_game(user.id, game.id)
+            if rating is not None:
+                user_score = rating.score
+        return GameCard(game=game, summary=summary, user_score=user_score)
+
+
+async def _published_game(game_uuid: UUID, uow: UnitOfWork) -> Game:
+    """Load a published game or raise the catalog not-found error."""
+    game = await uow.games.get_by_uuid_or_raise(game_uuid)
+    if not game.is_published:
+        msg = f'Game with uuid={game_uuid} not found'
+        raise GameNotFoundError(msg)
+    return game
 
 
 @inject

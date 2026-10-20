@@ -6,6 +6,7 @@ from pydantic import AwareDatetime, BaseModel, Field
 
 from config import settings
 from domain.models.genre import Genre
+from domain.models.rating import RatingSummary
 
 
 class Game(BaseModel):
@@ -39,3 +40,11 @@ class GamePage(BaseModel):
 
     items: list[Game]
     total: int
+
+
+class GameCard(BaseModel):
+    """Published game, the rating aggregate, and the caller's own score."""
+
+    game: Game
+    summary: RatingSummary
+    user_score: int | None = None

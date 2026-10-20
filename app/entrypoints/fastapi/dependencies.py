@@ -21,4 +21,14 @@ async def get_current_user(
     return await load_current_user(credentials.credentials)
 
 
+async def get_optional_user(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
+) -> User | None:
+    """Return the current user when a Bearer token is present."""
+    if credentials is None:
+        return None
+    return await load_current_user(credentials.credentials)
+
+
 CurrentUser = Annotated[User, Depends(get_current_user)]
+OptionalCurrentUser = Annotated[User | None, Depends(get_optional_user)]
