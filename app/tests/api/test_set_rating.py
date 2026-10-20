@@ -6,6 +6,14 @@ from httpx import AsyncClient
 from tests.fixtures.game import Catalog
 
 
+async def test_set_rating_requires_a_token(client: AsyncClient, catalog: Catalog) -> None:
+    """A request without a token is rejected."""
+    response = await client.put(f'/games/{catalog.disco.uuid}/rating', json={'score': 8})
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'detail': 'Not authenticated'}
+
+
 async def test_set_rating_returns_the_saved_score(client: AsyncClient, access_token: str, catalog: Catalog) -> None:
     """The current user scores a completed game and receives that score."""
     headers = {'Authorization': f'Bearer {access_token}'}
