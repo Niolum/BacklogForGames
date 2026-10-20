@@ -9,6 +9,7 @@ from .auth import (
 )
 from .games import create_game, get_game_by_uuid, get_games, update_game
 from .genres import create_genre, delete_genre, get_genre_by_id, get_genres, update_genre
+from .ratings import set_rating
 from .rawg import import_catalog
 from .user_games import add_to_backlog, add_to_completed, get_user_backlog, get_user_completed, remove_from_list
 from .users import delete_avatar, get_user_by_uuid, update_profile, upload_avatar
@@ -37,6 +38,7 @@ __all__ = [
     'register_user',
     'remove_from_list',
     'resend_confirmation_email',
+    'set_rating',
     'update_game',
     'update_genre',
     'update_profile',
