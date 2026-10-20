@@ -3,7 +3,14 @@ from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-    from domain.interfaces.repositories import EmailConfirmationRepo, GameRepo, GenreRepo, UserGameRepo, UserRepo
+    from domain.interfaces.repositories import (
+        EmailConfirmationRepo,
+        GameRepo,
+        GenreRepo,
+        RatingRepo,
+        UserGameRepo,
+        UserRepo,
+    )
 
 
 class UnitOfWork(ABC):
@@ -14,6 +21,7 @@ class UnitOfWork(ABC):
     genres: 'GenreRepo'
     games: 'GameRepo'
     user_games: 'UserGameRepo'
+    ratings: 'RatingRepo'
 
     @abstractmethod
     async def begin(self) -> None:

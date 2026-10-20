@@ -10,6 +10,7 @@ from .email_confirmation import EmailAlreadyConfrimedError, EmailCofirmError, Em
 from .file import InvalidFilePath, UploadFileTypeError
 from .game import GameNotFoundError, UploadGameCoverError
 from .genre import GenreHasGamesError, GenreNameAlreadyTakenError, GenreNotFoundError
+from .rating import RatingNotFoundError
 from .user import UploadUserAvatarError, UserNicknameAlreadyTakenError, UserNotFoundError
 from .user_game import UserGameAlreadyListedError, UserGameNotFoundError
 
@@ -28,6 +29,7 @@ __all__ = (
     'GenreNotFoundError',
     'InvalidFilePath',
     'NotFoundError',
+    'RatingNotFoundError',
     'TooManyRequests',
     'UploadFileTypeError',
     'UploadGameCoverError',
