@@ -1,5 +1,5 @@
 from .email_confirmation import EmailConfirmation
-from .game import Game, GamePage
+from .game import Game, GameCard, GamePage
 from .game_genre import GameGenre
 from .genre import Genre
 from .mail import MailMessage
@@ -11,6 +11,7 @@ from .user_game import UserGame, UserGamePage, UserGameStatus
 __all__ = [
     'EmailConfirmation',
     'Game',
+    'GameCard',
     'GameGenre',
     'GamePage',
     'Genre',

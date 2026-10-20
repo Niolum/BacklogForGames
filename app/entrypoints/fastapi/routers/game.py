@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query
 
 from domain.constants import DEFAULT_LIMIT
 from domain.services import SetRatingData
-from domain.use_cases import get_game_by_uuid, get_games, set_rating
+from domain.use_cases import get_game_card, get_games, set_rating
 from entrypoints.fastapi.dependencies import CurrentUser
 from entrypoints.fastapi.schemas.request import SetRatingRequestSchema
 from entrypoints.fastapi.schemas.response import (
@@ -48,5 +48,7 @@ async def set_rating_handler(
 @game_router.get('/{game_uuid}', response_model=GameCardResponseSchema)
 async def game_handler(game_uuid: UUID) -> GameCardResponseSchema:
     """Return one published game. An unknown uuid and a hidden game respond with 404."""
-    game = await get_game_by_uuid(game_uuid)
-    return GameCardResponseSchema.model_validate(game.model_dump())
+    card = await get_game_card(game_uuid)
+    return GameCardResponseSchema.model_validate(
+        card.game.model_dump() | {'users_score': card.summary.users_score, 'ratings_count': card.summary.ratings_count},
+    )

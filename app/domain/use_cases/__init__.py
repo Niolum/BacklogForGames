@@ -7,7 +7,7 @@ from .auth import (
     register_user,
     resend_confirmation_email,
 )
-from .games import create_game, get_game_by_uuid, get_games, update_game
+from .games import create_game, get_game_by_uuid, get_game_card, get_games, update_game
 from .genres import create_genre, delete_genre, get_genre_by_id, get_genres, update_genre
 from .ratings import set_rating
 from .rawg import import_catalog
@@ -27,6 +27,7 @@ __all__ = [
     'get_admin_user',
     'get_current_user',
     'get_game_by_uuid',
+    'get_game_card',
     'get_games',
     'get_genre_by_id',
     'get_genres',

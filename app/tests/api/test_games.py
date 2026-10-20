@@ -3,6 +3,8 @@ from uuid import UUID
 
 from httpx import AsyncClient
 
+from adapters.databases.in_memory.repositories.email_confirmations.email_confirmation import InMemEmailConfirmationRepo
+from adapters.databases.in_memory.repositories.users.user import InMemUserRepo
 from tests.fixtures.game import Catalog
 
 
@@ -127,6 +129,57 @@ async def test_get_game_returns_published_card(client: AsyncClient, catalog: Cat
         'users_score': None,
         'ratings_count': 0,
     }
+
+
+async def test_get_game_returns_the_average_of_several_scores(
+    client: AsyncClient,
+    access_token: str,
+    catalog: Catalog,
+) -> None:
+    """The game card returns the average rating and the number of ratings."""
+    scores = [8, 9]
+    owner_headers = {'Authorization': f'Bearer {access_token}'}
+    completed = await client.post(
+        '/users/me/completed',
+        headers=owner_headers,
+        json={'game_uuid': str(catalog.planescape.uuid)},
+    )
+    first = await client.put(
+        f'/games/{catalog.planescape.uuid}/rating',
+        headers=owner_headers,
+        json={'score': scores[0]},
+    )
+    registered = await client.post(
+        '/auth/register',
+        json={'email': 'other@mail.ru', 'password': 'secret', 'nickname': 'other'},
+    )
+    other = await InMemUserRepo().get_by_email('other@mail.ru')
+    assert other is not None
+    confirmation = next(item for item in InMemEmailConfirmationRepo.DB.values() if item.user_id == other.id)
+    confirmed = await client.post('/auth/confirm', json={'token': confirmation.token})
+    logged_in = await client.post('/auth/login', json={'email': 'other@mail.ru', 'password': 'secret'})
+    other_headers = {'Authorization': f'Bearer {logged_in.json()["access_token"]}'}
+    other_completed = await client.post(
+        '/users/me/completed',
+        headers=other_headers,
+        json={'game_uuid': str(catalog.planescape.uuid)},
+    )
+    second = await client.put(
+        f'/games/{catalog.planescape.uuid}/rating',
+        headers=other_headers,
+        json={'score': scores[1]},
+    )
+    card = await client.get(f'/games/{catalog.planescape.uuid}')
+
+    assert completed.status_code == HTTPStatus.CREATED
+    assert first.status_code == HTTPStatus.OK
+    assert registered.status_code == HTTPStatus.CREATED
+    assert confirmed.status_code == HTTPStatus.NO_CONTENT
+    assert other_completed.status_code == HTTPStatus.CREATED
+    assert second.status_code == HTTPStatus.OK
+    assert card.status_code == HTTPStatus.OK
+    assert card.json()['users_score'] == sum(scores) / len(scores)
+    assert card.json()['ratings_count'] == len(scores)
 
 
 async def test_get_game_unknown_uuid_returns_404(client: AsyncClient) -> None:
