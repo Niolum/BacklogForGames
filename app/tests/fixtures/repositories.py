@@ -9,6 +9,7 @@ from adapters.databases.in_memory.repositories.email_confirmations.email_confirm
 )
 from adapters.databases.in_memory.repositories.games.game import InMemGameRepo
 from adapters.databases.in_memory.repositories.genres.genre import InMemGenreRepo
+from adapters.databases.in_memory.repositories.ratings.rating import InMemRatingRepo
 from adapters.databases.in_memory.repositories.user_games.user_game import InMemUserGameRepo
 from adapters.databases.in_memory.repositories.users.user import InMemUserRepo
 
@@ -21,6 +22,7 @@ def clear_repositories() -> None:
     InMemGenreRepo.DB.clear()
     InMemGameRepo.DB.clear()
     InMemUserGameRepo.DB.clear()
+    InMemRatingRepo.DB.clear()
     root = Path(os.environ['STORAGE_CONFIG__LOCAL_ROOT'])
     if root.exists():
         shutil.rmtree(root)

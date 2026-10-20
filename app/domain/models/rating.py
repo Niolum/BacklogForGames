@@ -20,3 +20,10 @@ class Rating(BaseModel):
         default_factory=lambda: datetime.now(settings.default_timezone),
         description='Record update time',
     )
+
+
+class RatingSummary(BaseModel):
+    """Average and number of scores for one game."""
+
+    users_score: float | None = Field(default=None, description='Average user score')
+    ratings_count: int = Field(description='Number of user scores')
