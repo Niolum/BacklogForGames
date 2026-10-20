@@ -26,6 +26,7 @@ class GameCardResponseSchema(GameResponseSchema):
 
     users_score: float | None = Field(default=None, description='Average user score')
     ratings_count: int = Field(default=0, description='Number of user scores')
+    user_score: int | None = Field(default=None, description='Score of the current user')
 
 
 class GamePageResponseSchema(BaseModel):

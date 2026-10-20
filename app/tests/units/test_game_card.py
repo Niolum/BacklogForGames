@@ -17,6 +17,7 @@ async def test_get_game_card_has_no_scores_yet(catalog: Catalog) -> None:
     assert card.game.uuid == catalog.disco.uuid
     assert card.summary.users_score is None
     assert card.summary.ratings_count == 0
+    assert card.user_score is None
 
 
 async def test_get_game_card_averages_scores_from_several_users(
@@ -40,6 +41,37 @@ async def test_get_game_card_averages_scores_from_several_users(
 
     assert card.summary.ratings_count == len(scores)
     assert card.summary.users_score == sum(scores) / len(scores)
+    assert card.user_score is None
+
+
+async def test_get_game_card_returns_only_the_callers_score(
+    di_container: DIContainer,
+    registered_user: User,
+    catalog: Catalog,
+) -> None:
+    """The card shows the caller's score and leaves another user's score out of that field."""
+    owner_score = SetRatingData(score=7)
+    other_score = SetRatingData(score=10)
+    await add_to_completed(registered_user, AddUserGameData(game_uuid=catalog.planescape.uuid))
+    await set_rating(registered_user, catalog.planescape.uuid, owner_score)
+    await di_container.auth_service().register_user(
+        CreateUserData(email='other@mail.ru', password='secret', nickname='other'),
+    )
+    other = await InMemUserRepo().get_by_email('other@mail.ru')
+    assert other is not None
+    await add_to_completed(other, AddUserGameData(game_uuid=catalog.planescape.uuid))
+    before_other_rates = await get_game_card(catalog.planescape.uuid, other)
+
+    await set_rating(other, catalog.planescape.uuid, other_score)
+    owner_card = await get_game_card(catalog.planescape.uuid, registered_user)
+    other_card = await get_game_card(catalog.planescape.uuid, other)
+    anonymous = await get_game_card(catalog.planescape.uuid)
+
+    assert before_other_rates.user_score is None
+    assert owner_card.user_score == owner_score.score
+    assert other_card.user_score == other_score.score
+    assert anonymous.user_score is None
+    assert owner_card.summary.users_score == (owner_score.score + other_score.score) / 2
 
 
 async def test_get_game_card_hides_an_unpublished_game(catalog: Catalog) -> None:

@@ -43,7 +43,8 @@ class GamePage(BaseModel):
 
 
 class GameCard(BaseModel):
-    """Published game and the computed rating aggregate."""
+    """Published game, the rating aggregate, and the caller's own score."""
 
     game: Game
     summary: RatingSummary
+    user_score: int | None = None
