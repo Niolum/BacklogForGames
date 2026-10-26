@@ -1,13 +1,15 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, status
 
 from domain.constants import DEFAULT_LIMIT
-from domain.services import SetRatingData
-from domain.use_cases import get_game_card, get_games, set_rating
+from domain.services import CreateCommentData, SetRatingData
+from domain.use_cases import create_comment, get_game_card, get_game_comments, get_games, set_rating
 from entrypoints.fastapi.dependencies import CurrentUser, OptionalCurrentUser
-from entrypoints.fastapi.schemas.request import SetRatingRequestSchema
+from entrypoints.fastapi.schemas.request import CreateCommentRequestSchema, SetRatingRequestSchema
 from entrypoints.fastapi.schemas.response import (
+    CommentPageResponseSchema,
+    CommentResponseSchema,
     GameCardResponseSchema,
     GamePageResponseSchema,
     GameResponseSchema,
@@ -31,6 +33,36 @@ async def list_games_handler(
         items=[GameResponseSchema.model_validate(game.model_dump()) for game in page.items],
         total=page.total,
     )
+
+
+@game_router.get('/{game_uuid}/comments', response_model=CommentPageResponseSchema)
+async def list_comments_handler(
+    game_uuid: UUID,
+    limit: int = Query(default=DEFAULT_LIMIT, ge=1),
+    offset: int = Query(default=0, ge=0),
+) -> CommentPageResponseSchema:
+    """Return one page of comments on a published game. No token is required."""
+    page = await get_game_comments(game_uuid, limit=limit, offset=offset)
+    return CommentPageResponseSchema(
+        items=[CommentResponseSchema.model_validate(item.model_dump()) for item in page.items],
+        total=page.total,
+    )
+
+
+@game_router.post(
+    '/{game_uuid}/comments',
+    response_model=CommentResponseSchema,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_comment_handler(
+    current_user: CurrentUser,
+    game_uuid: UUID,
+    request_data: CreateCommentRequestSchema,
+) -> CommentResponseSchema:
+    """Store a comment on a published game. List status is not checked."""
+    data = CreateCommentData.model_validate(request_data.model_dump())
+    comment = await create_comment(current_user, game_uuid, data)
+    return CommentResponseSchema.model_validate(comment.model_dump())
 
 
 @game_router.put('/{game_uuid}/rating', response_model=RatingResponseSchema)

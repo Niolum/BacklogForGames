@@ -10,6 +10,7 @@ pytest_plugins = [
     'tests.fixtures.admin',
     'tests.fixtures.container',
     'tests.fixtures.game',
+    'tests.fixtures.comment',
     'tests.fixtures.genre',
     'tests.fixtures.repositories',
     'tests.fixtures.user',
