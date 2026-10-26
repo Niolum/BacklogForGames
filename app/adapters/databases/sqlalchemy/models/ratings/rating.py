@@ -48,6 +48,10 @@ class RatingORM(Base):
             'game_id',
             unique=True,
         ),
+        Index(
+            'ix_backlog_app_ratings_game_id',
+            'game_id',
+        ),
         CheckConstraint(
             'score >= 1 AND score <= 10',
             name='ck_backlog_app_ratings_score',
