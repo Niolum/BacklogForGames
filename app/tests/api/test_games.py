@@ -5,6 +5,7 @@ from httpx import AsyncClient
 
 from adapters.databases.in_memory.repositories.email_confirmations.email_confirmation import InMemEmailConfirmationRepo
 from adapters.databases.in_memory.repositories.users.user import InMemUserRepo
+from domain.models import UserGameStatus
 from tests.fixtures.game import Catalog
 
 
@@ -129,6 +130,7 @@ async def test_get_game_returns_published_card(client: AsyncClient, catalog: Cat
         'users_score': None,
         'ratings_count': 0,
         'user_score': None,
+        'list_status': None,
     }
 
 
@@ -182,6 +184,7 @@ async def test_get_game_returns_the_average_of_several_scores(
     assert card.json()['users_score'] == sum(scores) / len(scores)
     assert card.json()['ratings_count'] == len(scores)
     assert card.json()['user_score'] is None
+    assert card.json()['list_status'] is None
 
 
 async def test_get_game_returns_the_callers_score(client: AsyncClient, access_token: str, catalog: Catalog) -> None:
@@ -229,6 +232,62 @@ async def test_get_game_returns_the_callers_score(client: AsyncClient, access_to
     assert stranger.json()['users_score'] == float(score)
     assert broken.status_code == HTTPStatus.UNAUTHORIZED
     assert broken.json() == {'detail': 'Invalid token'}
+
+
+async def test_get_game_returns_the_callers_list_status(
+    client: AsyncClient,
+    access_token: str,
+    other_access_token: str,
+    catalog: Catalog,
+) -> None:
+    """A token adds that user's list status. Without a token, and for another user, the field is null."""
+    owner_headers = {'Authorization': f'Bearer {access_token}'}
+    backlog = await client.post(
+        '/users/me/backlog',
+        headers=owner_headers,
+        json={'game_uuid': str(catalog.planescape.uuid)},
+    )
+    completed = await client.post(
+        '/users/me/completed',
+        headers=owner_headers,
+        json={'game_uuid': str(catalog.disco.uuid)},
+    )
+    hidden = await client.post(
+        '/users/me/backlog',
+        headers=owner_headers,
+        json={'game_uuid': str(catalog.hidden.uuid)},
+    )
+    backlog_card = await client.get(f'/games/{catalog.planescape.uuid}', headers=owner_headers)
+    completed_card = await client.get(f'/games/{catalog.disco.uuid}', headers=owner_headers)
+    absent = await client.get(f'/games/{catalog.torment.uuid}', headers=owner_headers)
+    anonymous = await client.get(f'/games/{catalog.planescape.uuid}')
+    stranger = await client.get(
+        f'/games/{catalog.planescape.uuid}',
+        headers={'Authorization': f'Bearer {other_access_token}'},
+    )
+    broken = await client.get(f'/games/{catalog.planescape.uuid}', headers={'Authorization': 'Bearer not-a-token'})
+    hidden_card = await client.get(f'/games/{catalog.hidden.uuid}', headers=owner_headers)
+    catalog_list = await client.get('/games', headers=owner_headers)
+
+    assert backlog.status_code == HTTPStatus.CREATED
+    assert completed.status_code == HTTPStatus.CREATED
+    assert hidden.status_code == HTTPStatus.CREATED
+    assert backlog_card.status_code == HTTPStatus.OK
+    assert backlog_card.json()['list_status'] == UserGameStatus.backlog
+    assert completed_card.status_code == HTTPStatus.OK
+    assert completed_card.json()['list_status'] == UserGameStatus.completed
+    assert absent.status_code == HTTPStatus.OK
+    assert absent.json()['list_status'] is None
+    assert anonymous.status_code == HTTPStatus.OK
+    assert anonymous.json()['list_status'] is None
+    assert stranger.status_code == HTTPStatus.OK
+    assert stranger.json()['list_status'] is None
+    assert broken.status_code == HTTPStatus.UNAUTHORIZED
+    assert broken.json() == {'detail': 'Invalid token'}
+    assert hidden_card.status_code == HTTPStatus.NOT_FOUND
+    assert hidden_card.json() == {'detail': f'Game with uuid={catalog.hidden.uuid} not found'}
+    assert catalog_list.status_code == HTTPStatus.OK
+    assert all('list_status' not in item for item in catalog_list.json()['items'])
 
 
 async def test_get_game_unknown_uuid_returns_404(client: AsyncClient) -> None:

@@ -87,5 +87,6 @@ async def game_handler(game_uuid: UUID, current_user: OptionalCurrentUser) -> Ga
             'users_score': card.summary.users_score,
             'ratings_count': card.summary.ratings_count,
             'user_score': card.user_score,
+            'list_status': card.list_status,
         },
     )

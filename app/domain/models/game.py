@@ -42,9 +42,13 @@ class GamePage(BaseModel):
     total: int
 
 
+from domain.models.user_game import UserGameStatus  # noqa: E402
+
+
 class GameCard(BaseModel):
-    """Published game, the rating aggregate, and the caller's own score."""
+    """Published game, the rating aggregate, the caller's score, and their list status."""
 
     game: Game
     summary: RatingSummary
     user_score: int | None = None
+    list_status: UserGameStatus | None = None

@@ -4,6 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from domain.models import UserGameStatus
 from entrypoints.fastapi.schemas.response.genre import GenreResponseSchema
 
 
@@ -27,6 +28,7 @@ class GameCardResponseSchema(GameResponseSchema):
     users_score: float | None = Field(default=None, description='Average user score')
     ratings_count: int = Field(default=0, description='Number of user scores')
     user_score: int | None = Field(default=None, description='Score of the current user')
+    list_status: UserGameStatus | None = Field(default=None, description='List status of the current user')
 
 
 class GamePageResponseSchema(BaseModel):

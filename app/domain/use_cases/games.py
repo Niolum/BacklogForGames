@@ -4,7 +4,7 @@ from dependency_injector.wiring import Provide, inject
 
 from domain.exceptions import GameNotFoundError
 from domain.interfaces.uow import UnitOfWork
-from domain.models import Game, GameCard, GamePage, User
+from domain.models import Game, GameCard, GamePage, User, UserGameStatus
 from domain.services import GameChangeData, GameCoverData, GameCreateData, GameService
 
 
@@ -38,16 +38,20 @@ async def get_game_card(
     user: User | None = None,
     uow: UnitOfWork = Provide['uow'],
 ) -> GameCard:
-    """Load a published game, the average of its scores, and the caller's score."""
+    """Load a published game, its scores, and the caller's list status."""
     async with uow:
         game = await _published_game(game_uuid, uow)
         summary = await uow.ratings.get_summary(game.id)
         user_score = None
+        list_status: UserGameStatus | None = None
         if user is not None:
             rating = await uow.ratings.get_by_user_and_game(user.id, game.id)
             if rating is not None:
                 user_score = rating.score
-        return GameCard(game=game, summary=summary, user_score=user_score)
+            user_game = await uow.user_games.get_by_user_and_game(user.id, game.id)
+            if user_game is not None:
+                list_status = user_game.status
+        return GameCard(game=game, summary=summary, user_score=user_score, list_status=list_status)
 
 
 async def _published_game(game_uuid: UUID, uow: UnitOfWork) -> Game:
