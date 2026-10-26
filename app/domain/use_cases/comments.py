@@ -47,12 +47,31 @@ async def update_comment(
 ) -> CommentItem:
     """Replace the current user's comment text. Another user's comment stays."""
     async with uow:
-        comment = await uow.comments.get_by_uuid_or_raise(comment_uuid)
-        if comment.user_id != user.id:
-            msg = f'Comment with uuid={comment_uuid} not found'
-            raise CommentNotFoundError(msg)
+        comment = await _own_comment(user, comment_uuid, uow)
         updated = await comment_service.update_comment(comment, data.text)
         return _comment_item(updated, user)
+
+
+@inject
+async def delete_comment(
+    user: User,
+    comment_uuid: UUID,
+    uow: UnitOfWork = Provide['uow'],
+    comment_service: CommentService = Provide['comment_service'],
+) -> None:
+    """Remove the current user's comment. Another user's comment stays."""
+    async with uow:
+        comment = await _own_comment(user, comment_uuid, uow)
+        await comment_service.delete_comment(comment)
+
+
+async def _own_comment(user: User, comment_uuid: UUID, uow: UnitOfWork) -> Comment:
+    """Load a comment owned by the user or raise the same not-found error."""
+    comment = await uow.comments.get_by_uuid_or_raise(comment_uuid)
+    if comment.user_id != user.id:
+        msg = f'Comment with uuid={comment_uuid} not found'
+        raise CommentNotFoundError(msg)
+    return comment
 
 
 def _comment_item(comment: Comment, user: User) -> CommentItem:

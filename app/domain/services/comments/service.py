@@ -32,3 +32,7 @@ class CommentService(BaseService):
         )
         await self.comment_repo.update(updated)
         return updated
+
+    async def delete_comment(self, comment: Comment) -> None:
+        """Remove a comment the caller has already checked."""
+        await self.comment_repo.delete(comment)
