@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, Sequence, Text, func
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, Sequence, Text, func
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -52,6 +52,11 @@ class CommentORM(Base):
     )
 
     __table_args__ = (
+        Index(
+            'ix_backlog_app_comments_game_id_created_at',
+            'game_id',
+            'created_at',
+        ),
         CheckConstraint(
             f'char_length(text) >= {COMMENT_TEXT_MIN_LENGTH} AND char_length(text) <= {COMMENT_TEXT_MAX_LENGTH}',
             name='ck_backlog_app_comments_text',

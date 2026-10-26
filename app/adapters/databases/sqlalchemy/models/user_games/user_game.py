@@ -56,6 +56,11 @@ class UserGameORM(Base):
             'game_id',
             unique=True,
         ),
+        Index(
+            'ix_backlog_app_user_games_user_id_status',
+            'user_id',
+            'status',
+        ),
         CheckConstraint(
             "status IN ('backlog', 'completed')",
             name='ck_backlog_app_user_games_status',
