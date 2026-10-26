@@ -1,3 +1,4 @@
+from .comments.comment import CommentORM
 from .email_confirmations.email_confirmation import EmailConfirmationORM
 from .game_genres.game_genre import GameGenreORM
 from .games.game import GameORM
@@ -8,6 +9,7 @@ from .users.user import UserORM
 
 
 __all__ = [
+    'CommentORM',
     'EmailConfirmationORM',
     'GameGenreORM',
     'GameORM',
