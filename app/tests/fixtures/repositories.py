@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from adapters.databases.in_memory.repositories.comments.comment import InMemCommentRepo
 from adapters.databases.in_memory.repositories.email_confirmations.email_confirmation import (
     InMemEmailConfirmationRepo,
 )
@@ -23,6 +24,7 @@ def clear_repositories() -> None:
     InMemGameRepo.DB.clear()
     InMemUserGameRepo.DB.clear()
     InMemRatingRepo.DB.clear()
+    InMemCommentRepo.DB.clear()
     root = Path(os.environ['STORAGE_CONFIG__LOCAL_ROOT'])
     if root.exists():
         shutil.rmtree(root)
