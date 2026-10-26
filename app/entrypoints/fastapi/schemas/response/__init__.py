@@ -5,12 +5,19 @@ from .game import GameCardResponseSchema, GamePageResponseSchema, GameResponseSc
 from .genre import GenreResponseSchema
 from .rating import RatingResponseSchema
 from .user import PublicUserResponseSchema, UserMeResponseSchema
-from .user_game import UserGameItemResponseSchema, UserGamePageResponseSchema
+from .user_game import (
+    CompletedGameItemResponseSchema,
+    CompletedGamePageResponseSchema,
+    UserGameItemResponseSchema,
+    UserGamePageResponseSchema,
+)
 
 
 __all__ = (
     'CommentPageResponseSchema',
     'CommentResponseSchema',
+    'CompletedGameItemResponseSchema',
+    'CompletedGamePageResponseSchema',
     'ErrorResponseSchema',
     'GameCardResponseSchema',
     'GamePageResponseSchema',

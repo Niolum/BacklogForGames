@@ -22,7 +22,7 @@ async def test_add_to_completed_creates_a_completed_row(registered_user: User, c
     assert entry.completed_at is not None
     assert entry.game_id == catalog.disco.id
     assert backlog.items == []
-    assert [item.title for item in completed.items] == [catalog.disco.title]
+    assert [item.game.title for item in completed.items] == [catalog.disco.title]
     assert completed.total == 1
 
 
@@ -41,7 +41,7 @@ async def test_add_to_completed_moves_the_backlog_row(registered_user: User, cat
     assert entry.status is UserGameStatus.completed
     assert entry.completed_at is not None
     assert backlog.items == []
-    assert [item.title for item in completed.items] == [catalog.planescape.title]
+    assert [item.game.title for item in completed.items] == [catalog.planescape.title]
 
 
 async def test_add_to_completed_rejects_an_already_completed_game(listed_user: User, catalog: Catalog) -> None:
@@ -56,7 +56,7 @@ async def test_add_to_completed_rejects_an_already_completed_game(listed_user: U
     completed = await get_user_completed(listed_user.uuid, limit=20, offset=0)
     backlog_titles = [catalog.disco.title, catalog.planescape.title]
     assert [item.title for item in backlog.items] == backlog_titles
-    assert [item.title for item in completed.items] == [catalog.torment.title]
+    assert [item.game.title for item in completed.items] == [catalog.torment.title]
 
 
 async def test_add_to_completed_rejects_an_unknown_game(registered_user: User) -> None:
@@ -89,4 +89,4 @@ async def test_add_to_completed_allows_the_same_game_for_another_user(
 
     assert entry.user_id == other.id
     assert entry.status is UserGameStatus.completed
-    assert [item.title for item in page.items] == [catalog.planescape.title]
+    assert [item.game.title for item in page.items] == [catalog.planescape.title]

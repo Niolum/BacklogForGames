@@ -6,7 +6,7 @@ from .genre import Genre
 from .mail import MailMessage
 from .rating import Rating, RatingSummary
 from .user import User, UserListCounts, UserProfile
-from .user_game import UserGame, UserGamePage, UserGameStatus
+from .user_game import CompletedGame, CompletedGamePage, UserGame, UserGamePage, UserGameStatus
 
 
 __all__ = [
@@ -14,6 +14,8 @@ __all__ = [
     'CommentAuthor',
     'CommentItem',
     'CommentPage',
+    'CompletedGame',
+    'CompletedGamePage',
     'EmailConfirmation',
     'Game',
     'GameCard',

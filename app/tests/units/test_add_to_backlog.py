@@ -64,7 +64,7 @@ async def test_add_to_backlog_rejects_a_completed_game(listed_user: User, catalo
     backlog = await get_user_backlog(listed_user.uuid, limit=20, offset=0)
     completed = await get_user_completed(listed_user.uuid, limit=20, offset=0)
     assert catalog.torment.title not in [item.title for item in backlog.items]
-    assert [item.title for item in completed.items] == [catalog.torment.title]
+    assert [item.game.title for item in completed.items] == [catalog.torment.title]
 
 
 async def test_add_to_backlog_allows_the_same_game_for_another_user(
