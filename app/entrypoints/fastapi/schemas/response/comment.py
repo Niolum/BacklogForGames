@@ -13,10 +13,17 @@ class CommentAuthorResponseSchema(BaseModel):
 
 
 class CommentResponseSchema(BaseModel):
-    """Comment returned after it is created."""
+    """Comment on a game page."""
 
     uuid: UUID = Field(description='Comment ID')
     text: str = Field(description='Comment text')
     created_at: AwareDatetime = Field(description='Record creation time')
     updated_at: AwareDatetime = Field(description='Record update time')
     author: CommentAuthorResponseSchema
+
+
+class CommentPageResponseSchema(BaseModel):
+    """One page of comments on a game."""
+
+    items: list[CommentResponseSchema] = Field(description='Comments on this page')
+    total: int = Field(description='Number of comments on this game')
