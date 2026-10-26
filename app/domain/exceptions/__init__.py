@@ -6,6 +6,7 @@ from .base import (
     NotFoundError,
     TooManyRequests,
 )
+from .comment import CommentNotFoundError
 from .email_confirmation import EmailAlreadyConfrimedError, EmailCofirmError, EmailConfirmationNotFoundError
 from .file import InvalidFilePath, UploadFileTypeError
 from .game import GameNotFoundError, UploadGameCoverError
@@ -20,6 +21,7 @@ __all__ = (
     'BacklogGamesConflictError',
     'BacklogGamesPermissionError',
     'BadRequestError',
+    'CommentNotFoundError',
     'EmailAlreadyConfrimedError',
     'EmailCofirmError',
     'EmailConfirmationNotFoundError',
