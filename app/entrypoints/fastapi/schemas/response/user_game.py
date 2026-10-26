@@ -16,7 +16,20 @@ class UserGameItemResponseSchema(BaseModel):
 
 
 class UserGamePageResponseSchema(BaseModel):
-    """One page of a user's backlog or completed list."""
+    """One page of a user's backlog."""
 
     items: list[UserGameItemResponseSchema] = Field(description='Games on this page')
+    total: int = Field(description='Number of games in this list')
+
+
+class CompletedGameItemResponseSchema(UserGameItemResponseSchema):
+    """Completed game and the list owner's score."""
+
+    user_score: int | None = Field(description='Score of the list owner')
+
+
+class CompletedGamePageResponseSchema(BaseModel):
+    """One page of a user's completed games."""
+
+    items: list[CompletedGameItemResponseSchema] = Field(description='Games on this page')
     total: int = Field(description='Number of games in this list')

@@ -42,3 +42,17 @@ class UserGamePage(BaseModel):
 
     items: list[Game]
     total: int
+
+
+class CompletedGame(BaseModel):
+    """A completed game and the list owner's score."""
+
+    game: Game
+    user_score: int | None = None
+
+
+class CompletedGamePage(BaseModel):
+    """One page of completed games and the total number of matches."""
+
+    items: list[CompletedGame]
+    total: int

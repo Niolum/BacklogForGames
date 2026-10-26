@@ -20,7 +20,7 @@ async def test_remove_from_list_deletes_a_backlog_row(listed_user: User, catalog
 
     assert [item.title for item in backlog.items] == [catalog.disco.title]
     assert backlog.total == 1
-    assert [item.title for item in completed.items] == [catalog.torment.title]
+    assert [item.game.title for item in completed.items] == [catalog.torment.title]
 
 
 async def test_remove_from_list_deletes_a_completed_row(listed_user: User, catalog: Catalog) -> None:
@@ -30,7 +30,7 @@ async def test_remove_from_list_deletes_a_completed_row(listed_user: User, catal
     completed = await get_user_completed(listed_user.uuid, limit=20, offset=0)
 
     assert [item.title for item in backlog.items] == [catalog.disco.title, catalog.planescape.title]
-    assert [item.title for item in completed.items] == []
+    assert completed.items == []
     assert completed.total == 0
 
 

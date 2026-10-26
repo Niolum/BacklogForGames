@@ -20,6 +20,8 @@ from domain.use_cases import (
 from entrypoints.fastapi.dependencies import CurrentUser
 from entrypoints.fastapi.schemas.request import AddUserGameRequestSchema, UpdateProfileRequestSchema
 from entrypoints.fastapi.schemas.response import (
+    CompletedGameItemResponseSchema,
+    CompletedGamePageResponseSchema,
     PublicUserResponseSchema,
     UserGameItemResponseSchema,
     UserGamePageResponseSchema,
@@ -99,15 +101,21 @@ async def user_backlog_handler(
     return _user_game_page(page)
 
 
-@user_router.get('/{user_uuid}/completed', response_model=UserGamePageResponseSchema)
+@user_router.get('/{user_uuid}/completed', response_model=CompletedGamePageResponseSchema)
 async def user_completed_handler(
     user_uuid: UUID,
     limit: int = Query(default=DEFAULT_LIMIT, ge=1),
     offset: int = Query(default=0, ge=0),
-) -> UserGamePageResponseSchema:
-    """Return one page of the user's completed games. No token is required."""
+) -> CompletedGamePageResponseSchema:
+    """Return one page of the user's completed games and the owner's score. No token is required."""
     page = await get_user_completed(user_uuid, limit=limit, offset=offset)
-    return _user_game_page(page)
+    return CompletedGamePageResponseSchema(
+        items=[
+            CompletedGameItemResponseSchema.model_validate(item.game.model_dump() | {'user_score': item.user_score})
+            for item in page.items
+        ],
+        total=page.total,
+    )
 
 
 def _user_game_page(page: UserGamePage) -> UserGamePageResponseSchema:

@@ -3,7 +3,7 @@ from uuid import UUID
 from dependency_injector.wiring import Provide, inject
 
 from domain.interfaces.uow import UnitOfWork
-from domain.models import User, UserGame, UserGamePage, UserGameStatus
+from domain.models import CompletedGame, CompletedGamePage, User, UserGame, UserGamePage, UserGameStatus
 from domain.services import AddUserGameData, UserGameService
 
 
@@ -16,7 +16,9 @@ async def get_user_backlog(
     uow: UnitOfWork = Provide['uow'],
 ) -> UserGamePage:
     """Return one page of a user's backlog."""
-    return await _user_games(user_uuid, UserGameStatus.backlog, limit=limit, offset=offset, uow=uow)
+    async with uow:
+        user = await uow.users.get_by_uuid_or_raise(user_uuid)
+        return await uow.user_games.get_page(user_id=user.id, status=UserGameStatus.backlog, limit=limit, offset=offset)
 
 
 @inject
@@ -26,9 +28,22 @@ async def get_user_completed(
     limit: int,
     offset: int,
     uow: UnitOfWork = Provide['uow'],
-) -> UserGamePage:
-    """Return one page of a user's completed games."""
-    return await _user_games(user_uuid, UserGameStatus.completed, limit=limit, offset=offset, uow=uow)
+) -> CompletedGamePage:
+    """Return one page of a user's completed games and that user's score for each game."""
+    async with uow:
+        user = await uow.users.get_by_uuid_or_raise(user_uuid)
+        page = await uow.user_games.get_page(
+            user_id=user.id,
+            status=UserGameStatus.completed,
+            limit=limit,
+            offset=offset,
+        )
+        items: list[CompletedGame] = []
+        for game in page.items:
+            rating = await uow.ratings.get_by_user_and_game(user.id, game.id)
+            user_score = None if rating is None else rating.score
+            items.append(CompletedGame(game=game, user_score=user_score))
+        return CompletedGamePage(items=items, total=page.total)
 
 
 @inject
@@ -65,17 +80,3 @@ async def remove_from_list(
     """Remove a game from the current user's backlog or completed list."""
     async with uow:
         await user_game_service.remove_from_list(user, game_uuid)
-
-
-async def _user_games(
-    user_uuid: UUID,
-    status: UserGameStatus,
-    *,
-    limit: int,
-    offset: int,
-    uow: UnitOfWork,
-) -> UserGamePage:
-    """Load the user and one page of the requested list."""
-    async with uow:
-        user = await uow.users.get_by_uuid_or_raise(user_uuid)
-        return await uow.user_games.get_page(user_id=user.id, status=status, limit=limit, offset=offset)
