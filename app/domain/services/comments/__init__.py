@@ -1,5 +1,5 @@
 from .service import CommentService
-from .types import CreateCommentData
+from .types import CreateCommentData, UpdateCommentData
 
 
-__all__ = ('CommentService', 'CreateCommentData')
+__all__ = ('CommentService', 'CreateCommentData', 'UpdateCommentData')

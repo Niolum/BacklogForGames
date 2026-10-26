@@ -11,3 +11,13 @@ class CreateCommentRequestSchema(BaseModel):
         max_length=COMMENT_TEXT_MAX_LENGTH,
         description='Comment text',
     )
+
+
+class UpdateCommentRequestSchema(BaseModel):
+    """New text sent by the comment author."""
+
+    text: str = Field(
+        min_length=COMMENT_TEXT_MIN_LENGTH,
+        max_length=COMMENT_TEXT_MAX_LENGTH,
+        description='Comment text',
+    )

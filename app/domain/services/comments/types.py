@@ -11,3 +11,13 @@ class CreateCommentData(BaseModel):
         max_length=COMMENT_TEXT_MAX_LENGTH,
         description='Comment text',
     )
+
+
+class UpdateCommentData(BaseModel):
+    """New text of a comment the current user already wrote."""
+
+    text: str = Field(
+        min_length=COMMENT_TEXT_MIN_LENGTH,
+        max_length=COMMENT_TEXT_MAX_LENGTH,
+        description='Comment text',
+    )

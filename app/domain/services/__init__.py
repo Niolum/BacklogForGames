@@ -1,5 +1,5 @@
 from .auth import AuthService, CreateUserData, LoginData
-from .comments import CommentService, CreateCommentData
+from .comments import CommentService, CreateCommentData, UpdateCommentData
 from .games import GameChangeData, GameCoverData, GameCreateData, GameService
 from .genres import GenreChangeData, GenreCreateData, GenreService
 from .ratings import RatingService, SetRatingData
@@ -25,6 +25,7 @@ __all__ = [
     'RatingService',
     'RawgService',
     'SetRatingData',
+    'UpdateCommentData',
     'UpdateProfileData',
     'UserGameService',
     'UserService',

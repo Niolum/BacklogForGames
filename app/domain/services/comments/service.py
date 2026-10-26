@@ -1,12 +1,14 @@
+from datetime import datetime
 from uuid import uuid4
 
+from config import settings
 from domain.interfaces.repositories import CommentRepo
 from domain.models import Comment, Game, User
 from domain.services.base import BaseService
 
 
 class CommentService(BaseService):
-    """Stores a comment after the caller has already checked the game."""
+    """Stores a comment after the caller has already checked the game and the author."""
 
     def __init__(self, comments: CommentRepo):
         self.comment_repo: CommentRepo = comments
@@ -22,3 +24,11 @@ class CommentService(BaseService):
         )
         await self.comment_repo.create(comment)
         return comment
+
+    async def update_comment(self, comment: Comment, text: str) -> Comment:
+        """Replace the text and the update time. The creation time stays."""
+        updated = comment.model_copy(
+            update={'text': text, 'updated_at': datetime.now(settings.default_timezone)},
+        )
+        await self.comment_repo.update(updated)
+        return updated
