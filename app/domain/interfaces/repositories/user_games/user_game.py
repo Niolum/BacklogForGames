@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 from domain.interfaces.repositories.base import BaseRepo
-from domain.models import UserGame, UserGamePage, UserGameStatus
+from domain.models import UserGame, UserGamePage, UserGameStatus, UserListCounts
 
 
 class UserGameRepo(BaseRepo):
@@ -26,6 +26,10 @@ class UserGameRepo(BaseRepo):
     @abstractmethod
     async def delete(self, user_game: UserGame) -> None:
         """Delete a list entry."""
+
+    @abstractmethod
+    async def count_by_user(self, user_id: int) -> UserListCounts:
+        """Count the user's published backlog and completed games."""
 
     @abstractmethod
     async def get_page(

@@ -1,17 +1,18 @@
+from collections.abc import Mapping
 from uuid import UUID
 
 from fastapi import APIRouter, Query, Response, UploadFile, status
 
 from domain.constants import DEFAULT_LIMIT
-from domain.models import UserGamePage
+from domain.models import UserGamePage, UserProfile
 from domain.services import AddUserGameData, UpdateProfileData
 from domain.use_cases import (
     add_to_backlog,
     add_to_completed,
     delete_avatar,
     get_user_backlog,
-    get_user_by_uuid,
     get_user_completed,
+    get_user_profile,
     remove_from_list,
     update_profile,
     upload_avatar,
@@ -32,7 +33,8 @@ user_router = APIRouter(prefix='/users', tags=['User'])
 @user_router.get('/me')
 async def current_user_handler(current_user: CurrentUser) -> UserMeResponseSchema:
     """Return the current user's profile."""
-    return UserMeResponseSchema.model_validate(current_user.model_dump())
+    profile = await get_user_profile(current_user.uuid)
+    return _user_me(profile)
 
 
 @user_router.patch('/me')
@@ -43,7 +45,8 @@ async def update_current_user_handler(
     """Update nickname, date of birth and about of the current user."""
     data = UpdateProfileData.model_validate(request_data.model_dump(exclude_unset=True))
     user = await update_profile(current_user, data)
-    return UserMeResponseSchema.model_validate(user.model_dump())
+    profile = await get_user_profile(user.uuid)
+    return _user_me(profile)
 
 
 @user_router.post('/me/avatar')
@@ -51,7 +54,8 @@ async def upload_avatar_handler(current_user: CurrentUser, file: UploadFile) -> 
     """Store an avatar for the current user."""
     content = await file.read()
     user = await upload_avatar(current_user, content, file.content_type)
-    return UserMeResponseSchema.model_validate(user.model_dump())
+    profile = await get_user_profile(user.uuid)
+    return _user_me(profile)
 
 
 @user_router.delete('/me/avatar')
@@ -117,5 +121,18 @@ def _user_game_page(page: UserGamePage) -> UserGamePageResponseSchema:
 @user_router.get('/{user_uuid}')
 async def public_user_handler(user_uuid: UUID) -> PublicUserResponseSchema:
     """Return a public profile without email and password."""
-    user = await get_user_by_uuid(user_uuid)
-    return PublicUserResponseSchema.model_validate(user.model_dump())
+    profile = await get_user_profile(user_uuid)
+    return PublicUserResponseSchema.model_validate(_profile_payload(profile))
+
+
+def _user_me(profile: UserProfile) -> UserMeResponseSchema:
+    """Map a profile to the current user's response."""
+    return UserMeResponseSchema.model_validate(_profile_payload(profile))
+
+
+def _profile_payload(profile: UserProfile) -> Mapping[str, object]:
+    """Merge the user row with the counted list sizes."""
+    return profile.user.model_dump() | {
+        'backlog_count': profile.counts.backlog_count,
+        'completed_count': profile.counts.completed_count,
+    }

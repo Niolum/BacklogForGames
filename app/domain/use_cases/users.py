@@ -3,18 +3,20 @@ from uuid import UUID
 from dependency_injector.wiring import Provide, inject
 
 from domain.interfaces.uow import UnitOfWork
-from domain.models import User
+from domain.models import User, UserProfile
 from domain.services import UpdateProfileData, UserService
 
 
 @inject
-async def get_user_by_uuid(
+async def get_user_profile(
     user_uuid: UUID,
     uow: UnitOfWork = Provide['uow'],
-) -> User:
-    """Load a user by the public uuid."""
+) -> UserProfile:
+    """Load a user and the sizes of their lists."""
     async with uow:
-        return await uow.users.get_by_uuid_or_raise(user_uuid)
+        user = await uow.users.get_by_uuid_or_raise(user_uuid)
+        counts = await uow.user_games.count_by_user(user.id)
+        return UserProfile(user=user, counts=counts)
 
 
 @inject
