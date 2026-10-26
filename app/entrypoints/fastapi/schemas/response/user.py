@@ -14,6 +14,8 @@ class PublicUserResponseSchema(BaseModel):
     created_at: AwareDatetime = Field(description='Date of registration user')
     about: str | None = Field(default=None, description='Information about yourself')
     avatar_url: Path | None = Field(default=None, description='User avatar URL')
+    backlog_count: int = Field(description='Number of games in the backlog')
+    completed_count: int = Field(description='Number of completed games')
 
 
 class UserMeResponseSchema(PublicUserResponseSchema):

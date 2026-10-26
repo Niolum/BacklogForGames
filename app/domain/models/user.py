@@ -24,3 +24,17 @@ class User(BaseModel):
     avatar_url: Path | None = Field(default=None, description='User avatar URL')
     email_confirmed: bool = Field(default=False, description='Email confirmation flag')
     is_admin: bool = Field(default=False, description='Administrator flag')
+
+
+class UserListCounts(BaseModel):
+    """Sizes of one user's lists. They are counted, not stored on the user."""
+
+    backlog_count: int = Field(description='Number of games in the backlog')
+    completed_count: int = Field(description='Number of completed games')
+
+
+class UserProfile(BaseModel):
+    """A user together with the sizes of their lists."""
+
+    user: User
+    counts: UserListCounts

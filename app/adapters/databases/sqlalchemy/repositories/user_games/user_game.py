@@ -7,7 +7,7 @@ from adapters.databases.sqlalchemy.models import GameORM, UserGameORM
 from adapters.databases.sqlalchemy.repositories.base import SQLABaseRepo
 from domain.exceptions import UserGameNotFoundError
 from domain.interfaces.repositories import UserGameRepo
-from domain.models import UserGame, UserGamePage, UserGameStatus
+from domain.models import UserGame, UserGamePage, UserGameStatus, UserListCounts
 
 
 class SQLAUserGameRepo(SQLABaseRepo, UserGameRepo):
@@ -51,6 +51,26 @@ class SQLAUserGameRepo(SQLABaseRepo, UserGameRepo):
             raise UserGameNotFoundError(msg)
         await self.session.delete(user_game_orm)
         await self.session.flush()
+
+    @override
+    async def count_by_user(self, user_id: int) -> UserListCounts:
+        result = await self.session.execute(
+            select(UserGameORM.status, func.count())
+            .join(GameORM, GameORM.id == UserGameORM.game_id)
+            .where(UserGameORM.user_id == user_id, GameORM.is_published.is_(True))
+            .group_by(UserGameORM.status),
+        )
+        backlog_count = 0
+        completed_count = 0
+        for status, total in result.all():
+            if not isinstance(total, int):
+                msg = 'List count has an unexpected type'
+                raise TypeError(msg)
+            if status == UserGameStatus.backlog:
+                backlog_count = total
+            elif status == UserGameStatus.completed:
+                completed_count = total
+        return UserListCounts(backlog_count=backlog_count, completed_count=completed_count)
 
     @override
     async def get_page(
