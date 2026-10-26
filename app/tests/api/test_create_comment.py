@@ -7,6 +7,7 @@ from httpx import AsyncClient
 
 from adapters.databases.in_memory.repositories.comments.comment import InMemCommentRepo
 from adapters.databases.in_memory.repositories.users.user import InMemUserRepo
+from domain.constants import COMMENT_TEXT_MAX_LENGTH
 from entrypoints.fastapi.schemas.response import CommentResponseSchema
 from tests.fixtures.game import Catalog
 
@@ -71,6 +72,27 @@ async def test_create_comment_returns_the_created_comment(
     assert comment.updated_at == stored.updated_at
     assert stored.user_id == author.id
     assert stored.game_id == catalog.disco.id
+
+
+@pytest.mark.parametrize(
+    'text',
+    ['', 'a' * (COMMENT_TEXT_MAX_LENGTH + 1)],
+)
+async def test_create_comment_rejects_text_outside_the_limit(
+    client: AsyncClient,
+    access_token: str,
+    catalog: Catalog,
+    text: str,
+) -> None:
+    """Empty text and text longer than 1000 characters are rejected before a comment is stored."""
+    response = await client.post(
+        f'/games/{catalog.disco.uuid}/comments',
+        headers={'Authorization': f'Bearer {access_token}'},
+        json={'text': text},
+    )
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+    assert InMemCommentRepo.DB == {}
 
 
 async def test_create_comment_unknown_game_returns_404(client: AsyncClient, access_token: str) -> None:
