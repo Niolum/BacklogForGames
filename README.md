@@ -2,7 +2,7 @@
 
 API for a personal game list. A user keeps games they plan to play, marks games they have finished, rates finished games, and leaves comments on catalog games.
 
-[![Python](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-3.14-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.142.2-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Coverage](https://img.shields.io/badge/coverage-98%25-brightgreen)](https://coverage.readthedocs.io/)
 
@@ -16,7 +16,7 @@ API for a personal game list. A user keeps games they plan to play, marks games 
 
 ## Stack
 
-- Python 3.13
+- Python 3.14
 - FastAPI, Pydantic v2, pydantic-settings
 - PostgreSQL 17, SQLAlchemy 2.1 (async), asyncpg, Alembic
 - Poetry
@@ -29,7 +29,7 @@ API for a personal game list. A user keeps games they plan to play, marks games 
 
 Install these before running the project:
 
-- [Python 3.13](https://www.python.org/)
+- [Python 3.14](https://www.python.org/)
 - [Poetry](https://python-poetry.org/)
 - [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
 - [PostgreSQL 17](https://www.postgresql.org/)
