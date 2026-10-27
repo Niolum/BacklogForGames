@@ -207,7 +207,6 @@ attrs = ">=17.3.0"
 frozenlist = ">=1.1.1"
 multidict = ">=4.5,<7.0"
 propcache = ">=0.2.0"
-typing_extensions = {version = ">=4.4", markers = "python_version < \"3.13\""}
 yarl = ">=1.17.0,<2.0"
 
 [package.extras]
@@ -239,7 +238,6 @@ files = [
 
 [package.dependencies]
 frozenlist = ">=1.1.0"
-typing-extensions = {version = ">=4.2", markers = "python_version < \"3.13\""}
 
 [[package]]
 name = "alembic"
@@ -300,7 +298,6 @@ files = [
 [package.dependencies]
 idna = ">=2.8"
 sniffio = ">=1.1"
-typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
 
 [package.extras]
 trio = ["trio (>=0.31.0)"]
@@ -2496,7 +2493,6 @@ files = [
 
 [package.dependencies]
 pytest = ">=8.4,<10"
-typing-extensions = {version = ">=4.12", markers = "python_version < \"3.13\""}
 
 [package.extras]
 docs = ["sphinx (>=5.3)", "sphinx-rtd-theme (>=1)", "sphinx-tabs (>=3.5)"]
@@ -3144,7 +3140,6 @@ files = [
 
 [package.dependencies]
 anyio = ">=4.0.0,<5"
-typing-extensions = {version = ">=4.10.0", markers = "python_version < \"3.13\""}
 
 [package.extras]
 full = ["httpx (>=0.27.0,<0.29.0)", "httpx2 (>=2.0.0)", "itsdangerous", "jinja2", "opentelemetry-api", "python-multipart (>=0.0.18)", "pyyaml"]
@@ -3184,7 +3179,6 @@ botocore-stubs = "*"
 types-aiobotocore = "*"
 types-aiobotocore-s3 = {version = ">=2.25.0,<2.26.0", optional = true, markers = "extra == \"s3\""}
 types-s3transfer = "*"
-typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [package.extras]
 accessanalyzer = ["types-aiobotocore-accessanalyzer (>=2.25.0,<2.26.0)"]
@@ -3612,7 +3606,6 @@ files = [
 
 [package.dependencies]
 botocore-stubs = "*"
-typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [package.extras]
 accessanalyzer = ["types-aiobotocore-accessanalyzer (>=3.9.0,<3.10.0)"]
@@ -4060,9 +4053,6 @@ files = [
     {file = "types_aiobotocore_s3-2.25.2-py3-none-any.whl", hash = "sha256:151301e84bb2f1cbf30f0d1ef791bb75c141cfbfe47b93fd317b7f1ba3eb35e4"},
     {file = "types_aiobotocore_s3-2.25.2.tar.gz", hash = "sha256:678aa425491af19bd6d011d59ecdbbb7ae7e95800efddcf4fd559ab72c94e194"},
 ]
-
-[package.dependencies]
-typing-extensions = {version = "*", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "types-aiofiles"
@@ -4689,5 +4679,5 @@ propcache = ">=0.2.1"
 
 [metadata]
 lock-version = "2.1"
-python-versions = "^3.11"
-content-hash = "2da278917fdec28f58ba5a2286b870128c400c21c9137018e0645ddc193eddaa"
+python-versions = ">=3.14"
+content-hash = "622e68bc198d84fdfa285b4da08a7a678d063811742214590dd02650f296d319"
